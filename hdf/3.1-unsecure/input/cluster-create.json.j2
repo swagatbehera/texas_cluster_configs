@@ -1,0 +1,138 @@
+{
+  "tags": {
+    "userDefinedTags": {}
+  },
+  "parameters": {
+    "yarnQueue": "yarn-private",
+    "lifeTime": -1
+  },
+  "flexId": null,
+  "general": {
+    "name": "{{ cluster_name }}",
+    "credentialName": "ycloud"
+  },
+  "cluster": {
+    "ambari": {
+      "userName": "{{ ambari_username }}",
+      "password": "{{ ambari_password }}",
+      "blueprintName": "{{ cluster_name }}",
+      "ambariRepoDetailsJson": {
+        "version": "2.6.1.3",
+        "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3",
+        "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+      },
+      "ambariStackDetails": {
+        "stack": "HDF",
+        "version": "3.1",
+        "verify": false,
+        "enableGplRepo": false,
+        "mpackUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.1.0.0-564/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.0.0-564.tar.gz",
+        "repositoryVersion": "3.1.0.0-564",
+        "versionDefinitionFileUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.1.0.0-564/HDF-3.1.0.0-564.xml"
+      },
+      "gateway": {
+        "enableGateway": false,
+        "gatewayType": "INDIVIDUAL"
+      },
+      "validateBlueprint": false,
+      "ambariSecurityMasterKey": ""
+    }
+  },
+  "imageSettings": {
+    "imageId": "{{ image_id }}",
+    "imageCatalog": "{{ image_catalog }}"
+  },
+  "instanceGroups": [
+    {
+      "parameters": {},
+      "template": {
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+      },
+      "nodeCount": 1,
+      "group": "master_1",
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start",
+        "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start"
+      ]
+    },
+    {
+      "parameters": {},
+      "template": {
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+      },
+      "nodeCount": 1,
+      "group": "master_2",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start",
+        "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start"
+      ]
+    },
+    {
+      "parameters": {},
+      "template": {
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+      },
+      "nodeCount": 1,
+      "group": "master_3",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
+      ]
+    },
+    {
+      "parameters": {},
+      "template": {
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+      },
+      "nodeCount": 1,
+      "group": "master_4",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
+      ]
+    },
+    {
+      "parameters": {},
+      "template": {
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+      },
+      "nodeCount": 1,
+      "group": "master_5",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
+      ]
+    }
+  ],
+  "stackAuthentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbcc+uaFq0z4bwipiy+o4Nwcm6pdrN0iePc9C5Buhq0ZFmatSXqYj4H252CU7bps/gZ/pNtIzk+/K1oMQX4Zj1UTLVqQF2kMP5TTW1Uud6uNMBWkmhnD0btgRnoBvZjUQpCOqqkPPVqknptpeDnHsXB2NM5zWzLfQAFHvLvjZ5qehBx+xOL6VzYVHwRbnOTAFWMN4SSmorBGcmfWEi4GaVYzYsdW6X8FT6eVczLZJYFyOPNCSeRRc37UwiOPpnXu6OjzwDYnSeuqqMDWp8uFc5/LWokgAlLtFXVz9FO2fuceK9vV40NEzJSfYEmUAXNgbPPGAjRUON7bQIeKRrwzsd sustaining@hortonworks.com",
+    "publicKeyId": null
+  }
+}
