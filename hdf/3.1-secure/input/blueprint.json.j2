@@ -26,6 +26,8 @@
     {
       "nifi-ambari-config": {
         "properties": {
+          "nifi.max_mem": "4G",
+          "nifi.initial_mem": "4G",
           "nifi.content.repository.dir.default": "/grid/0/nifi/content_repository",
           "nifi.flowfile.repository.dir": "/grid/0/nifi/flowfile_repository",
           "nifi.provenance.repository.dir.default": "/grid/0/nifi/provenance_repository",
@@ -89,7 +91,11 @@
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
           "nifi.security.identity.mapping.value.dn": "$1@$2",
           "nifi.security.identity.mapping.value.kerb": "$1@$2",
-          "nifi.security.user.login.identity.provider": "kerberos-provider"
+          "nifi.security.user.login.identity.provider": "kerberos-provider",
+          "nifi.web.https.network.interface.default": "eth0",
+          "nifi.cluster.node.protocol.threads": "20",
+          "nifi.cluster.node.connection.timeout": "30 secs",
+          "nifi.cluster.node.read.timeout": "30 secs"
         }
       }
     },
