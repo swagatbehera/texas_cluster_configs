@@ -17,24 +17,25 @@
       "password": "{{ ambari_password }}",
       "blueprintName": "{{ cluster_name }}",
       "ambariRepoDetailsJson": {
-        "version": "2.6.1.3",
-        "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3",
+        "version": "{{ ambari_version }}",
+        "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/{{ ambari_version }}",
         "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
       },
       "ambariStackDetails": {
-        "stack": "HDF",
-        "version": "3.1",
+        "stack": "{{ stack }}",
+        "version": "{{ stack_main_version }}",
         "verify": false,
         "enableGplRepo": false,
-        "mpackUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.1.0.0-564/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.0.0-564.tar.gz",
-        "repositoryVersion": "3.1.0.0-564",
-        "versionDefinitionFileUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.1.0.0-564/HDF-3.1.0.0-564.xml"
+        "mpackUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/{{ mpack_version }}/tars/hdf_ambari_mp/hdf-ambari-mpack-{{ mpack_version }}.tar.gz",
+        "repositoryVersion": "{{ stack_version_number }}",
+        "versionDefinitionFileUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/{{ stack_version_number }}/{{ stack_version }}.xml"
       },
       "gateway": {
         "enableGateway": false,
         "gatewayType": "INDIVIDUAL"
       },
       "validateBlueprint": false,
+      {% if kerberos %}
       "ambariSecurityMasterKey": "",
       "kerberos": {
         "password": "{{ ambari_password }}",
@@ -43,6 +44,9 @@
         "tcpAllowed": false
       },
       "enableSecurity": true
+      {% else %}
+      "ambariSecurityMasterKey": ""
+      {% endif %}
     }
   },
   "imageSettings": {
@@ -82,6 +86,7 @@
       "recoveryMode": "MANUAL",
       "recipeNames": [
         "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start",
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start"
       ]
     },
@@ -98,7 +103,8 @@
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start"
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
     },
     {
@@ -114,7 +120,8 @@
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start"
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
     },
     {
@@ -130,7 +137,8 @@
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start"
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
     }
   ],

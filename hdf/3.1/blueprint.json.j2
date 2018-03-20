@@ -40,7 +40,16 @@
     {
       "nifi-ambari-ssl-config": {
         "properties": {
+          {% if kerberos %}
+          "nifi.node.ssl.isenabled": "true",
+          "nifi.security.keystoreType": "JKS",
+          "nifi.security.truststoreType": "JKS",
+          "nifi.security.keystorePasswd": "Hortonworks@123",
+          "nifi.security.keyPasswd": "Hortonworks@123",
+          "nifi.security.truststorePasswd": "Hortonworks@123",
+          {% else %}
           "nifi.node.ssl.isenabled": "false",
+          {% endif %}
           "nifi.toolkit.tls.token": "Hortonworks@123",
           "nifi.initial.admin.identity": "hrt_qa@HWX.VIBGYOR.COM"
         }
@@ -59,6 +68,19 @@
         }
       }
     },
+    {% if kerberos %}
+    {
+      "kafka-broker": {
+        "properties": {
+          "auto.create.topics.enable": "true",
+          "delete.topic.enable": "true",
+          "listeners": "SASL_PLAINTEXT://localhost:6668,PLAINTEXT://localhost:6669",
+          "security.inter.broker.protocol": "SASL_PLAINTEXT",
+          "log.dirs": "/grid/0/kafka-logs"
+        }
+      }
+    },
+    {% endif %}
     {
       "storm-site": {
         "properties": {
@@ -75,6 +97,9 @@
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
           "nifi.security.identity.mapping.value.dn": "$1@$2",
           "nifi.security.identity.mapping.value.kerb": "$1@$2",
+          {% if kerberos %}
+          "nifi.security.user.login.identity.provider": "kerberos-provider",
+          {% endif %}
           "nifi.web.https.network.interface.default": "eth0",
           "nifi.cluster.node.protocol.threads": "20",
           "nifi.cluster.node.connection.timeout": "30 secs",
@@ -266,7 +291,7 @@
   ],
   "Blueprints": {
     "blueprint_name": "{{ cluster_name }}",
-    "stack_name": "HDF",
-    "stack_version": "3.1"
+    "stack_name": "{{ stack }}",
+    "stack_version": "{{ stack_main_version }}"
   }
 }
