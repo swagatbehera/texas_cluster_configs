@@ -1,16 +1,26 @@
 {
+  "general": {
+    "name": "{{ cluster_name }}",
+    "credentialName": "{{ 'ycloud' if cloud_provider == 'yarn' else 'openstack' }}"
+  },
   "tags": {
     "userDefinedTags": {}
   },
+  {% if cloud_provider == 'yarn' %}
   "parameters": {
     "yarnQueue": "hdf-qe-nightly",
     "lifeTime": -1
   },
-  "flexId": null,
-  "general": {
-    "name": "{{ cluster_name }}",
-    "credentialName": "ycloud"
+  {% endif %}
+  "placement": {
+    {% if cloud_provider == 'openstack' %}
+    "availabilityZone": "nova",
+    "region": "RegionOne"
+    {% else %}
+    "region": "default"
+    {% endif %}
   },
+  "flexId": null,
   "cluster": {
     "ambari": {
       "userName": "{{ ambari_username }}",
@@ -54,94 +64,55 @@
     "imageCatalog": "{{ image_catalog }}"
   },
   "instanceGroups": [
+    {% for node in range(1, 6) %}
     {
-      "parameters": {},
       "template": {
+        {% if cloud_provider == 'yarn' %}
         "customInstanceType": {
           "cpus": 4,
           "memory": 8192
         }
+        {% else %}
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "cloudbreak",
+        "volumeType": "HDD",
+        "volumeCount": 0,
+        "volumeSize": 100
+        {% endif %}
       },
       "nodeCount": 1,
-      "group": "master_1",
-      "type": "GATEWAY",
+      "group": "master_{{ node }}",
+      "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
       "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start",
-        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start",
-        "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start"
-      ]
-    },
-    {
-      "parameters": {},
-      "template": {
-        "customInstanceType": {
-          "cpus": 4,
-          "memory": 8192
-        }
+      {% if cloud_provider == 'openstack' %}
+      "securityGroup": {
+        "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
       },
-      "nodeCount": 1,
-      "group": "master_2",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
+      {% endif %}
       "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start",
-        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start",
-        "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start"
-      ]
-    },
-    {
-      "parameters": {},
-      "template": {
-        "customInstanceType": {
-          "cpus": 4,
-          "memory": 8192
-        }
-      },
-      "nodeCount": 1,
-      "group": "master_3",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
+        {% if node == 1 %}
+        "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start",
+        {% elif node == 2 %}
+        "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
+        {% endif %}
         "{{ cluster_name }}-init-sh-pre-ambari-start",
         "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
-    },
-    {
-      "parameters": {},
-      "template": {
-        "customInstanceType": {
-          "cpus": 4,
-          "memory": 8192
-        }
-      },
-      "nodeCount": 1,
-      "group": "master_4",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start",
-        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
-      ]
-    },
-    {
-      "parameters": {},
-      "template": {
-        "customInstanceType": {
-          "cpus": 4,
-          "memory": 8192
-        }
-      },
-      "nodeCount": 1,
-      "group": "master_5",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ cluster_name }}-init-sh-pre-ambari-start",
-        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
-      ]
-    }
+    {{ '},' if node < 5 else '}' }}
+    {% endfor %}
   ],
+  {% if cloud_provider == 'openstack' %}
+  "network": {
+    "parameters": {
+      {# See Openstack > Network > Networks #}
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkingOption": "provider",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    }
+  },
+  {% endif %}
   "stackAuthentication": {
     "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbcc+uaFq0z4bwipiy+o4Nwcm6pdrN0iePc9C5Buhq0ZFmatSXqYj4H252CU7bps/gZ/pNtIzk+/K1oMQX4Zj1UTLVqQF2kMP5TTW1Uud6uNMBWkmhnD0btgRnoBvZjUQpCOqqkPPVqknptpeDnHsXB2NM5zWzLfQAFHvLvjZ5qehBx+xOL6VzYVHwRbnOTAFWMN4SSmorBGcmfWEi4GaVYzYsdW6X8FT6eVczLZJYFyOPNCSeRRc37UwiOPpnXu6OjzwDYnSeuqqMDWp8uFc5/LWokgAlLtFXVz9FO2fuceK9vV40NEzJSfYEmUAXNgbPPGAjRUON7bQIeKRrwzsd sustaining@hortonworks.com",
     "publicKeyId": null
