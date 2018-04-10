@@ -10,6 +10,6 @@ useradd nifi
 for i in $(seq 0 3);
 do
     rm -rf /grid/${i}/*
-    mkdir /grid/${i}/nifi
+    mkdir -p /grid/${i}/nifi
     chown nifi:nifi /grid/${i}/nifi
 done
