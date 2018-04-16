@@ -28,24 +28,24 @@
       "blueprintName": "{{ cluster_name }}",
       "ambariRepoDetailsJson": {
         "version": "{{ ambari_version }}",
-        "baseUrl": "http://public-repo-1.hortonworks.com/ambari/{{ operating_system }}/2.x/updates/{{ ambari_version }}",
+        "baseUrl": "{{ ambari_repo_url }}",
         "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
       },
       "ambariStackDetails": {
         "stack": "{{ stack }}",
-        "version": "{{ stack_main_version }}",
+        "version": "{{ stack_major_version }}",
         "verify": false,
         "enableGplRepo": false,
-        "mpackUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/{{ operating_system }}/3.x/BUILDS/{{ mpack_version }}/tars/hdf_ambari_mp/hdf-ambari-mpack-{{ mpack_version }}.tar.gz",
-        "repositoryVersion": "{{ stack_version_number }}",
-        "versionDefinitionFileUrl": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/{{ operating_system }}/3.x/BUILDS/{{ stack_version_number }}/{{ stack_version }}.xml"
+        "mpackUrl": "{{ mpack_url }}",
+        "repositoryVersion": "{{ stack_version_with_build }}",
+        "versionDefinitionFileUrl": "{{ stack_vdf_url }}"
       },
       "gateway": {
         "enableGateway": false,
         "gatewayType": "INDIVIDUAL"
       },
       "validateBlueprint": false,
-      {% if kerberos %}
+      {% if security == 'kerberos' %}
       "ambariSecurityMasterKey": "",
       "kerberos": {
         "password": "{{ ambari_password }}",
