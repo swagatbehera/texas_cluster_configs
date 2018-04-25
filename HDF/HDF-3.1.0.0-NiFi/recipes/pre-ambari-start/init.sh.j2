@@ -1,0 +1,16 @@
+#!/bin/bash -eux
+
+{% if os.startswith('centos') %}
+yum install -y mysql-connector-java
+{% elif os.startswith('ubuntu') %}
+apt-get install -y mysql-connector-java
+{% endif %}
+
+useradd nifi
+
+for i in $(seq 0 3);
+do
+    rm -rf /grid/${i}/*
+    mkdir -p /grid/${i}/nifi
+    chown nifi:nifi /grid/${i}/nifi
+done

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# atlas usually by default allows only the admin user to login and we need to create a new user and provide
+# permissions for the new user.
+# for nifi tests we need to give admin permissions for the tests to run. Please note that the nifi user is given
+# admin privileges to be easier for us to debug.
+echo "nifiPolicy;;nifi:rwud;;ROLE_ADMIN:rwud;;type:*,entity:*,operation:*,taxonomy:*,term:*" >> /etc/atlas/conf/policy-store.txt

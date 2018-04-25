@@ -1,25 +1,63 @@
 {
   "configurations": [
     {
+        "cluster-env": {
+            "properties": {
+                "command_retry_max_time_in_sec": "1200"
+            }
+        }
+    },
+    {% if 'ranger' in security  %}
+    {
+        "admin-properties": {
+            "properties": {
+                "db_root_password": "rangerdba",
+                "db_password": "rangerdba",
+                "policymgr_external_url": "http:\/\/localhost:6080",
+                "db_root_user": "rangerdba",
+                "DB_FLAVOR": "MYSQL",
+                "db_user": "rangerdba",
+                "db_name": "ranger",
+                "db_host": "localhost",
+                "SQL_CONNECTOR_JAR": "\/usr\/share\/java\/mysql-connector-java.jar"
+            }
+        }
+    },
+    {
+        "ranger-env": {
+            "properties": {
+                "is_solrCloud_enabled": "true",
+                "ranger_privelege_user_jdbc_url": "jdbc:mysql:\/\/localhost",
+                "ranger_admin_password": "Rangerpassword@123",
+                "is_external_solrCloud_enabled": "false",
+                "is_external_solrCloud_kerberos": "false",
+                "ranger-kafka-plugin-enabled": "No",
+                "ranger-nifi-plugin-enabled": "Yes",
+                "xasecure.audit.destination.hdfs": "false"
+            }
+        }
+    },
+    {
+        "ranger-admin-site": {
+            "properties": {
+                "ranger.jpa.jdbc.driver": "com.mysql.jdbc.Driver",
+                "ranger.jpa.jdbc.url": "jdbc:mysql:\/\/localhost\/ranger",
+                "ranger.audit.source.type": "solr"
+            }
+        }
+    },
+    {% endif %}
+    {
       "streamline-common": {
         "properties": {
           "database_name": "streamline",
           "streamline.storage.connector.user": "streamline",
           "streamline.storage.type": "mysql",
           "registry.url": "http://%HOSTGROUP::master_2%:7788/api/v1",
-          "jar.storage": "/grid/0/hdf/streamline/jars",
           "streamline.dashboard.url": "http://%HOSTGROUP::master_2%:9090",
-          "topology.test.results.dir": "/grid/0/hdf/streamline/topology_test_results",
           "streamline.storage.connector.password": "streamline",
           "streamline.storage.connector.connectURI": "jdbc:mysql://localhost:3306/streamline",
           "jar.storage.type": "local"
-        }
-      }
-    },
-    {
-      "nifi-ambari-ssl-config": {
-        "properties": {
-          "content": "<property name=\"Node Identity 1\">CN=%HOSTGROUP::master_3%, OU=NIFI</property>\n\n<property name=\"Node Identity 2\">CN=%HOSTGROUP::master_4%, OU=NIFI</property>\n\n<property name=\"Node Identity 3\">CN=%HOSTGROUP::master_5%, OU=NIFI</property>\n\n"
         }
       }
     },
@@ -28,10 +66,6 @@
         "properties": {
           "nifi.max_mem": "4G",
           "nifi.initial_mem": "4G",
-          "nifi.content.repository.dir.default": "/grid/0/nifi/content_repository",
-          "nifi.flowfile.repository.dir": "/grid/0/nifi/flowfile_repository",
-          "nifi.provenance.repository.dir.default": "/grid/0/nifi/provenance_repository",
-          "nifi.database.dir": "/grid/0/nifi/database_repository",
           "nifi.sensitive.props.key": "Hortonworks@123",
           "nifi.security.encrypt.configuration.password": "Hortonworks@123"
         }
@@ -40,7 +74,7 @@
     {
       "nifi-ambari-ssl-config": {
         "properties": {
-          {% if kerberos %}
+          {% if security in ('kerberos', 'ranger') %}
           "nifi.node.ssl.isenabled": "true",
           "nifi.security.keystoreType": "JKS",
           "nifi.security.truststoreType": "JKS",
@@ -51,7 +85,8 @@
           "nifi.node.ssl.isenabled": "false",
           {% endif %}
           "nifi.toolkit.tls.token": "Hortonworks@123",
-          "nifi.initial.admin.identity": "hrt_qa@HWX.VIBGYOR.COM"
+          "nifi.initial.admin.identity": "hrt_qa@HDF.COM",
+          "content": "<property name=\"Node Identity 1\">CN=%HOSTGROUP::master_3%, OU=NIFI</property>\n\n<property name=\"Node Identity 2\">CN=%HOSTGROUP::master_4%, OU=NIFI</property>\n\n<property name=\"Node Identity 3\">CN=%HOSTGROUP::master_5%, OU=NIFI</property>\n\n"
         }
       }
     },
@@ -59,7 +94,6 @@
       "registry-common": {
         "properties": {
           "database_name": "registry",
-          "jar.storage": "/grid/0/hdf/registry",
           "registry.storage.connector.user": "registry",
           "registry.storage.type": "mysql",
           "registry.storage.connector.password": "registry",
@@ -68,60 +102,74 @@
         }
       }
     },
-    {% if kerberos %}
+    {% if security in ('kerberos', 'ranger') %}
     {
       "kafka-broker": {
         "properties": {
           "auto.create.topics.enable": "true",
           "delete.topic.enable": "true",
           "listeners": "SASL_PLAINTEXT://localhost:6668,PLAINTEXT://localhost:6669",
-          "security.inter.broker.protocol": "SASL_PLAINTEXT",
-          "log.dirs": "/grid/0/kafka-logs"
+          "security.inter.broker.protocol": "SASL_PLAINTEXT"
         }
       }
     },
     {% endif %}
     {
-      "storm-site": {
-        "properties": {
-          "storm.local.dir": "/grid/0/hadoop/storm"
-        }
-      }
-    },
-    {
       "nifi-properties": {
         "properties": {
-          "nifi.content.repository.directory.dir1": "/grid/0/nifi/content_repository",
-          "nifi.provenance.repository.directory.dir1": "/grid/0/nifi/provenance_repository",
+          {% if security in ('kerberos', 'ranger') %}
+          "nifi.security.user.login.identity.provider": "kerberos-provider",
           "nifi.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
           "nifi.security.identity.mapping.value.dn": "$1@$2",
           "nifi.security.identity.mapping.value.kerb": "$1@$2",
-          {% if kerberos %}
-          "nifi.security.user.login.identity.provider": "kerberos-provider",
           {% endif %}
           "nifi.web.https.network.interface.default": "eth0",
           "nifi.cluster.node.protocol.threads": "20",
           "nifi.cluster.node.connection.timeout": "30 secs",
-          "nifi.cluster.node.read.timeout": "30 secs"
+          "nifi.cluster.node.read.timeout": "30 secs",
+          "nifi.cluster.flow.election.max.wait.time" : "2 mins",
+          "nifi.remote.input.socket.port" : "9889"
         }
       }
     },
     {
-      "ams-hbase-site": {
-        "properties": {
-          "hbase.rootdir": "file:///grid/0/var/lib/ambari-metrics-collector/hbase",
-          "hbase.tmp.dir": "/grid/0/var/lib/ambari-metrics-collector/hbase-tmp"
-        }
-      }
+      "nifi-registry-properties": {
+           "properties": {
+                {% if security in ('kerberos', 'ranger') %}
+                "nifi.registry.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
+                "nifi.registry.security.identity.mapping.value.dn": "$1@$2",
+                "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)\/instance@(.*?)$",
+                "nifi.registry.security.identity.mapping.value.kerb": "$1@$2"
+                {% endif %}
+           }
+       }
     },
     {
-      "infra-solr-env": {
-        "properties": {
-          "infra_solr_datadir": "/grid/0/ambari_infra_solr/data"
+      "nifi-registry-ambari-ssl-config": {
+          "properties": {
+                {% if security in ('kerberos', 'ranger') %}
+                "nifi.registry.ssl.isenabled": "true",
+                "nifi.registry.initial.admin.identity": "hrt_qa@HDF.COM",
+                "nifi.registry.security.keyPasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.keystorePasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.truststorePasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.truststoreType": "JKS",
+                {% else %}
+                "nifi.registry.ssl.isenabled": "false",
+                {% endif %}
+                "content": "<property name=\"NiFi Identity 1\">CN=%HOSTGROUP::master_2%, OU=NIFI<\/property>\n<property name=\"NiFi Identity 2\">CN=%HOSTGROUP::master_3%, OU=NIFI<\/property>\n<property name=\"NiFi Identity 3\">CN=%HOSTGROUP::master_4%, OU=NIFI<\/property>\n<property name=\"NiFi Identity 4\">CN=%HOSTGROUP::master_5%, OU=NIFI<\/property>\n"
+          }
+       }
+    },
+    {
+       "nifi-registry-ambari-config": {
+            "properties": {
+                "nifi.registry.security.encrypt.configuration.password": "Hortonworks@123"
+            }
         }
-      }
     }
+
   ],
   "host_groups": [
     {
@@ -199,8 +247,19 @@
         {
           "name": "INFRA_SOLR_CLIENT"
         },
+        {% if 'ranger' in security  %}
         {
-          "name": "NIMBUS"
+            "name": "RANGER_ADMIN"
+        },
+        {
+            "name": "RANGER_USERSYNC"
+        },
+        {
+            "name": "RANGER_TAGSYNC"
+        },
+        {% endif %}
+        {
+            "name": "NIMBUS"
         }
       ],
       "configurations": [],

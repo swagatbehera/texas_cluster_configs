@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# script to setup certs for kafka. The certs will be set up only if the cluster is kerberized.
+
+{% if  security in ('kerberos', 'ranger') %}
+# Download the nifi-test-data-ycloud.zip from ycloud
+wget -nv -O nifi-test-data-ycloud.zip "http://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1529158270&Signature=xN4ONiY9X4%2BIEZ8DZiigfDH1xIo%3D" && \
+    unzip -q nifi-test-data-ycloud.zip -d /tmp/
+
+# get the hostname
+host=$(hostname -f)
+echo ${host}
+
+KEYTOOL_CMD="keytool"
+SSL_DIR="/tmp/nifi-test-data-ycloud/hdf_kafka/ssl"
+keystore_file="${SSL_DIR}/server.keystore.jks"
+SSL_KEY_PASSWORD="Hortonworks!"
+SSL_STORE_PASSWORD="Hortonworks!"
+SSL_CA_PASSWORD="Hortonworks!"
+VALIDITY=3650
+
+# create certificate for each host
+${KEYTOOL_CMD} -genkey -alias ${host} -keyalg RSA -keysize 1024 -dname CN=${host},OU=hw,O=hw,L=paloalto,ST=ca,C=us -keypass ${SSL_KEY_PASSWORD} -keystore ${keystore_file} -storepass ${SSL_STORE_PASSWORD}
+
+# export the certificate from the keystore
+${KEYTOOL_CMD} -keystore ${keystore_file} -alias ${host} -certreq -file ${SSL_DIR}/cert-file -keypass ${SSL_KEY_PASSWORD} -storepass ${SSL_STORE_PASSWORD}
+
+# sign it with the CA
+openssl x509 -req -CA ${SSL_DIR}/ca-cert -CAkey ${SSL_DIR}/ca-key -in ${SSL_DIR}/cert-file -out ${SSL_DIR}/cert-signed -days ${VALIDITY} -CAcreateserial -passin pass:${SSL_CA_PASSWORD}
+
+# import both the certificate of the CA and the signed certificate into the keystore
+${KEYTOOL_CMD} -keystore ${keystore_file} -alias CARoot -import -file ${SSL_DIR}/ca-cert -keypass ${SSL_KEY_PASSWORD} -storepass ${SSL_STORE_PASSWORD} -noprompt
+
+${KEYTOOL_CMD} -keystore ${keystore_file} -alias ${host} -import -file ${SSL_DIR}/cert-signed -keypass ${SSL_KEY_PASSWORD} -storepass ${SSL_STORE_PASSWORD} -noprompt
+
+# give full permissions on
+chmod 777 ${keystore_file}
+{% endif %}
+

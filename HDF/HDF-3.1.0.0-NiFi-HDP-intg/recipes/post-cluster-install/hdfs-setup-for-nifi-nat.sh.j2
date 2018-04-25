@@ -1,0 +1,37 @@
+#!/bin/bash
+# get the cluster name
+cluster_name=$(curl -XGET -sk -u admin:admin https://localhost/ambari/api/v1/clusters  | jq -r '.items[0].Clusters.cluster_name')
+echo ${cluster_name}
+
+# get the ranger current configs tag version to get the configs
+current_tag=$(curl -ks -u admin:admin https://localhost/ambari/api/v1/clusters\?fields\=Clusters/desired_configs | jq -r '.items[].Clusters.desired_configs."admin-properties".tag')
+echo ${current_tag}
+
+# get the ranger external url from ranger configs
+ranger_external_url=$(curl -ks -u admin:admin "https://localhost/ambari/api/v1/clusters/${cluster_name}/configurations?type=admin-properties&tag=TOPOLOGY_RESOLVED" | jq -r '.items[].properties.policymgr_external_url')
+echo ${ranger_external_url}
+
+# create the ranger key in the key manager
+curl -kv -u keyadmin:keyadmin "${ranger_external_url}/service/keys/key?provider=${cluster_name}_kms" -d '{ "length": 128, "name": "nifi-tde", "description": "", "cipher": "AES/CTR/NoPadding", "attributes": { "key.acl.name": "nifi-tde" } }' -XPOST -H 'Content-Type: application/json'
+
+# create a nifi user
+id -u nifi &>/dev/null || useradd nifi
+usermod -g hadoop nifi
+
+# log in as hdfs user
+su - hdfs
+
+# kinit with hdfs user
+kinit -kt /etc/security/keytabs/hdfs.headless.keytab hdfs-${cluster_name}@HWX.SITE
+
+# set up hdfs directories
+hdfs dfs -mkdir -p /user/nifi/tde
+hdfs dfs -chown -R nifi:hdfs /user/nifi
+
+# set up hdfs TDE zones
+hdfs crypto -listZones
+hdfs crypto -createZone -keyName nifi-tde -path /user/nifi/tde
+hdfs crypto -listZones
+
+
+

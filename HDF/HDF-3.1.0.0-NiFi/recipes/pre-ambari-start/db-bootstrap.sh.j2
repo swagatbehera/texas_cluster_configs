@@ -53,7 +53,9 @@ FLUSH PRIVILEGES;
 # create database for hive
 CREATE DATABASE hive;
 CREATE USER 'hive'@'%' IDENTIFIED BY 'hive';
+CREATE USER 'hive'@'localhost' IDENTIFIED BY 'hive';
 GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 # create database for druid
