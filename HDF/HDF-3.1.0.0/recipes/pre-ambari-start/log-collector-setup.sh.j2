@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Setup pyenv for running log collector
+
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+
+export PYENV_ROOT=~/.pyenv
+export PATH=$PYENV_ROOT/bin:$PATH
+
+eval "$(pyenv init -)"
+pyenv install 3.6.4
+pyenv local 3.6.4
+
+pip install paramiko
+
+cd ~
+
+# Clone and setup log-collector
+# TODO find a better way to handle keys
+
+mkdir -p ~/.ssh
+
+cat > ~/.ssh/qe-group-id-rsa <<-EOM
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAvwGvUo7BMhyl9MaujG/KE6d4nlH+r1sHfI/t085U1EmX0ak0
+C6auRmcQre/ogdas/nA0AZoQVH5+jc9Rfo6yKKgdzzA1PPcRFvIdQpZqAKinT7bb
+kyZn1mWPTHYuog8zBOFinhcandyXDI/nBL3yRoVyC+qq+Ad2EpoVVi9lMXBcrLIn
+UycUMxsr1dO6uI5BI1lk2acs8+31AJkWiraHIcDPT0DoX9TYqta/rSAAUCDR5z4e
+j6u9F0EW27hB2bk/SCjbxHGQ0DZd0jZuSmH+HYumk9k2Ep2PhEP62SUsJ6cd1UIB
+xQB1ioNRWp5a6h5m1HBZMU+iEGp603h7Jn+w2QIDAQABAoIBAAawUWprs1pE5I7g
+0kX6uDHeAHxS1L9hSa7T/3kWVaQle5qM+VSbHqk6fLwKlbLOSLqURU31DjNXRqlC
+pFDxQE3qLTkPMB4VbNTH37xwNgAV594Dwkax5pr8bXs4/EMSky/NkL2Gg5kZm3SG
+KYnh+PT9QVQngJs0766RFMQy3rFPdYCevumWStZUPSUbGVGvMwbUkivfm3fDJmb7
+5KNcQ0p86ZlJ3FOcoZAMI1vjk4F0n4zHt8OGzWgyoCJkon81wZ0qvCHuqyNyxo4X
+Vd0t9z+B1VfDZDrHtQ/zz1+Ud4C3DxrH6cCAUwHwd0MRsUZsvnBltHuiOu1IpRaI
+ZNy+VwECgYEA5DfJuhX4eaxpqVNlETHi/GkIIMf4eoTwrKHryiwOvHOzPqibTkzF
+JmTIneQaf9NjUaQeoD3deDZgt6s/0Z4gZCK8mGOLm7v/jNCyjhaH8I8hxxi9ccf4
+eHDKZrlsCUJmMhJobTtzTO1MBZfi7DQNGs8GHvnz95CEoz9+WUkLc/kCgYEA1kI8
+63kPUrtyUkhmlVw5MDMq5MIsmGbjm8q7nlQRzNO7rhOwPeJR74x5gZnYK3wrChbP
+Hnk67E9qbgXipK1YvHq3oq0377YwkcYSqScK+WzUMZ/WRhzq76BfcLhWS+yqITW9
+vuD+4THa6aa9Lcch0jI9nz1p4ahv5UdKZuWvm+ECgYAobP1t2iB2pSTeWqhngFe9
+8HkBHYsVYOElI1WaLW260h/pNIK2PwEZSPcEiPhstiw8tP670dmeRruhLVOTtRf1
+xPV1ZQTA5G9jKUDHzJPt99y64NYGBq8r3obr5WKOzVU+/2XCG6rT8KDryLjosFu1
+6QAjkpE1xELKjB+8fyTpOQKBgQDNtn0dLHd83IIv5Fmx8ADseUQmrRP6I1dHPkgT
+BO6uNWBOC5M8Z255y+rhdx9o6Oe94RZtUMI1Hy61gisQJ2s6U6y6oQtCuS861u0V
+wWm0/ztghfFKEfuzpMvdwu8AKLNT/XA3s3ikKKThjvi12ipr0Vb+7A0b3wfIIEGc
+N8z6oQKBgQC02Zbyy2oOYYkX2iKQtLmVrqsTGSDkgaf7lOpdUm8Gt3PtG8kMbh17
+3dkNOdlznukgZ7DLuTYDLlot+IMDoAnqRbTC8bCrjWE04JVQ80d95Ek+JYbWC73k
+QQLDX7LBWSyI3V+g5fb7x4EvKoDuBhGwpYVe5jBjDYCUjMDMecMiBg==
+-----END RSA PRIVATE KEY-----
+EOM
+
+cat > ~/.ssh/qe-group-id-rsa-pub <<- EOM
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/Aa9SjsEyHKX0xq6Mb8oTp3ieUf6vWwd8j+3TzlTUSZfRqTQLpq5GZxCt7+iB1qz+cDQBmhBUfn6Nz1F+jrIoqB3PMDU89xEW8h1ClmoAqKdPttuTJmfWZY9Mdi6iDzME4WKeFxqd3JcMj+cEvfJGhXIL6qr4B3YSmhVWL2UxcFyssidTJxQzGyvV07q4jkEjWWTZpyzz7fUAmRaKtochwM9PQOhf1Niq1r+tIABQINHnPh6Pq70XQRbbuEHZuT9IKNvEcZDQNl3SNm5KYf4di6aT2TYSnY+EQ/rZJSwnpx3VQgHFAHWKg1FanlrqHmbUcFkxT6IQanrTeHsmf7DZ qe-group@hortonworks.com
+EOM
+
+tee -a ~/.ssh/config > /dev/null << EOM
+Host github.com
+  IdentityFile /root/.ssh/qe-group-id-rsa
+  StrictHostKeyChecking no
+EOM
+
+chmod -R 0400 ~/.ssh
+chmod 0600 ~/.ssh/config
+
+git clone -b qaas-log-collection git@github.com:hortonworks/infra-v2.git
+
+cd infra-v2
+
+export PYTHONPATH=$(pwd)
+
+# Invoke log collection daemon
+
+python  $PYTHONPATH/modules/log_collection/trigger/logCollectionDaemon.py --action start --cluster-name "/qaas/{{ cluster_name }}" --cloud-type kubernetes --freq 8 --sleep-time-minutes 30 --test-component qaas --working-directory $PYTHONPATH/modules/log_collection/ --log-transport-type=awscli --storage=s3
