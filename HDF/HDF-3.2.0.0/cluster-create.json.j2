@@ -94,17 +94,12 @@
       "recipeNames": [
         {% if node == 1 %}
         "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start",
-        "{{ cluster_name }}-hdfs-setup-for-nifi-nat-sh-post-cluster-install",
         {% elif node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
-        {% elif node == 5 %}
-        "{{ cluster_name }}-start-knox-ldap-sh-post-cluster-install",
-        "{{ cluster_name }}-atlas-permission-setup-sh-post-cluster-install",
         {% endif %}
         {% if cloud_provider == 'yarn' %}
         "{{ cluster_name }}-ycloud-dns-workaround-sh-pre-ambari-start",
         {% endif %}
-        "{{ cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
         "{{ cluster_name }}-init-sh-pre-ambari-start",
         "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]

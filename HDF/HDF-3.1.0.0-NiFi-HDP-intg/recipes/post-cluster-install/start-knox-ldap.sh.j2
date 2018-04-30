@@ -1,0 +1,5 @@
+#!/bin/bash -eux
+
+# A utility to start knox demo ldap server so that it can be used for knox tests.
+# this utility assumes that ldap.sh start is always found at /usr/hdp/current/knox-server/bin/
+/usr/hdp/current/knox-server/bin/ldap.sh start
