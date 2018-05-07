@@ -48,10 +48,12 @@
       {% if security in ('kerberos', 'ranger') %}
       "ambariSecurityMasterKey": "",
       "kerberos": {
-        "password": "{{ ambari_password }}",
-        "masterKey": "{{ ambari_password }}",
-        "admin": "{{ ambari_username }}",
-        "tcpAllowed": false
+         "url": "ctr-e134-1499953498516-82150-01-000002.hwx.site",
+         "adminUrl": "ctr-e134-1499953498516-82150-01-000002.hwx.site",
+         "realm": "HDF.COM",
+         "tcpAllowed": true,
+         "password": "Hortonworks",
+         "principal": "admin/admin"
       },
       "enableSecurity": true
       {% else %}
