@@ -570,12 +570,14 @@
         {
             "nifi-ambari-ssl-config": {
                 "properties": {
+                    {% if security in ('kerberos', 'ranger') %}
                     "nifi.node.ssl.isenabled": "true",
                     "nifi.security.keystoreType": "JKS",
                     "nifi.security.truststoreType": "JKS",
                     "nifi.security.keystorePasswd": "Hortonworks@123",
                     "nifi.security.keyPasswd": "Hortonworks@123",
                     "nifi.security.truststorePasswd": "Hortonworks@123",
+                    {% endif %}
                     "nifi.toolkit.tls.token": "Hortonworks@123",
                     "nifi.initial.admin.identity": "hrt_qa@HDF.COM"
                 }
@@ -584,11 +586,13 @@
         {
           "nifi-properties": {
             "properties": {
+              {% if  security in ('kerberos', 'ranger') %}
               "nifi.security.user.login.identity.provider": "kerberos-provider",
               "nifi.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
               "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
               "nifi.security.identity.mapping.value.dn": "$1@$2",
               "nifi.security.identity.mapping.value.kerb": "$1@$2",
+              {% endif %}
               "nifi.web.https.network.interface.default": "eth0",
               "nifi.cluster.node.protocol.threads": "20",
               "nifi.cluster.node.connection.timeout": "30 secs",

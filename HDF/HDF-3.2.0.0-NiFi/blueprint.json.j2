@@ -42,27 +42,6 @@
             }
         },
         {% endif %}
-        {% if security in ('kerberos', 'ranger') %}
-        {
-          "kerberos-env": {
-            "properties" : {
-              "realm" : "HDF.COM",
-               "kdc_type" : "mit-kdc",
-               "kdc_hosts" : "ctr-e134-1499953498516-82150-01-000002.hwx.site",
-               "admin_server_host" : "ctr-e134-1499953498516-82150-01-000002.hwx.site"
-            }
-          }
-        },
-        {
-          "krb5-conf": {
-            "properties" : {
-              "manage_krb5_conf" : "true",
-              "domains" : "HDF.COM",
-              "content" : "[libdefaults]\nrenew_lifetime = 7d\nforwardable = true\ndefault_realm = HDF.COM\nticket_lifetime = 24h\ndns_lookup_realm = false\ndns_lookup_kdc = false\ndefault_ccache_name = /tmp/krb5cc_%{uid}\n#default_tgs_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n#default_tkt_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n[logging]\ndefault = FILE:/var/log/krb5kdc.log\nadmin_server = FILE:/var/log/kadmind.log\nkdc = FILE:/var/log/krb5kdc.log\n[realms]\nHDF.COM = {\nadmin_server = ctr-e134-1499953498516-82150-01-000002.hwx.site\nkdc = ctr-e134-1499953498516-82150-01-000002.hwx.site\n}\n"
-            }
-          }
-        },
-        {% endif %}
         {
           "nifi-properties": {
             "properties": {
@@ -85,8 +64,8 @@
         {
             "nifi-ambari-config": {
                 "properties": {
-                    "nifi.sensitive.props.key": "Hortonworks@123",
-                    "nifi.security.encrypt.configuration.password": "Hortonworks@123",
+                    "nifi.sensitive.props.key": "Hortonworks@123456",
+                    "nifi.security.encrypt.configuration.password": "Hortonworks@123456",
                     "nifi.initial_mem": "4G",
                     "nifi.max_mem": "4G"
                 }
@@ -95,13 +74,15 @@
         {
             "nifi-ambari-ssl-config": {
                 "properties": {
-                    {% if security in ('kerberos', 'ranger') %}
-                    "nifi.node.ssl.isenabled": "true",
+                    {% if  security in ('kerberos', 'ranger') %}
                     "nifi.security.keystoreType": "JKS",
+                    "nifi.security.truststorePasswd": "Hortonworks@123456",
+                    "nifi.node.ssl.isenabled": "true",
+                    "nifi.toolkit.tls.token": "Hortonworks@123456",
                     "nifi.security.truststoreType": "JKS",
-                    "nifi.security.keystorePasswd": "Hortonworks@123",
-                    "nifi.security.keyPasswd": "Hortonworks@123",
-                    "nifi.security.truststorePasswd": "Hortonworks@123",
+                    "nifi.security.keystorePasswd": "Hortonworks@123456",
+                    "nifi.security.keyPasswd": "Hortonworks@123456",
+                    "nifi.initial.admin.identity": "hrt_qa@HDF.COM",
                     {% endif %}
                     "nifi.toolkit.tls.token": "Hortonworks@123",
                     "nifi.initial.admin.identity": "hrt_qa@HDF.COM"
@@ -116,7 +97,9 @@
                     "registry.storage.connector.connectURI": "jdbc:mysql:\/\/localhost:3306\/registry",
                     "registry.storage.connector.password": "registry",
                     "database_name": "registry",
-                    "jar.storage.type": "local"
+                    "jar.storage.type": "local",
+                    "db_root_user": "root",
+                    "db_root_password": "root"
                 }
             }
         },

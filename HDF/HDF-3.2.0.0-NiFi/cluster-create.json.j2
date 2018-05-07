@@ -8,7 +8,7 @@
   },
   {% if cloud_provider == 'yarn' %}
   "parameters": {
-    "yarnQueue": "qaas",
+    "yarnQueue": "hdf-qe-nightly",
     "lifeTime": -1
   },
   {% endif %}
@@ -96,12 +96,8 @@
       "recipeNames": [
         {% if node == 1 %}
         "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start",
-        "{{ cluster_name }}-hdfs-setup-for-nifi-nat-sh-post-cluster-install",
         {% elif node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
-        {% elif node == 5 %}
-        "{{ cluster_name }}-start-knox-ldap-sh-post-cluster-install",
-        "{{ cluster_name }}-atlas-permission-setup-sh-post-cluster-install",
         {% endif %}
         {% if cloud_provider == 'yarn' %}
         "{{ cluster_name }}-ycloud-dns-workaround-sh-pre-ambari-start",
