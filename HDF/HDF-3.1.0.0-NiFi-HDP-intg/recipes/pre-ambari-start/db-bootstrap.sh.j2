@@ -84,7 +84,7 @@ ENDDBSQLOF
 }
 
 install_mysql_server() {
-    {% if os.startswith('centos') or os.startswith('rhel') %}
+    {% if os.startswith('centos') %}
     yum install -y mysql-community-release
     yum install -y mysql-community-server
     {% elif os.startswith('ubuntu') %}
@@ -93,11 +93,10 @@ install_mysql_server() {
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y mysql-server-5.6
     {% endif %}
-    true
 }
 
 start_mysql_server() {
-	service {{ 'mysqld' if os.startswith('centos') or os.startswith('rhel') else 'mysql' }} start
+	service {{ 'mysqld' if os.startswith('centos') else 'mysql' }} start
 }
 
 init_db_bootstrap_script() {
@@ -105,7 +104,7 @@ init_db_bootstrap_script() {
 }
 
 main() {
-	{% if os.startswith('centos') or os.startswith('rhel') %}
+	{% if os.startswith('centos') %}
 	create_mysql_community_repo
 	{% endif %}
 	create_db_init_sql_file

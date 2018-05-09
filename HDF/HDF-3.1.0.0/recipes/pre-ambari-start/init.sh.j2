@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-{% if os.startswith('centos') or os.startswith('rhel') %}
+{% if os.startswith('centos') %}
 yum install -y mysql-connector-java
 {% elif os.startswith('ubuntu') %}
 apt-get install -y mysql-connector-java
