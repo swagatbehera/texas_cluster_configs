@@ -95,13 +95,15 @@
         {
             "nifi-ambari-ssl-config": {
                 "properties": {
-                    "nifi.security.keystoreType": "JKS",
-                    "nifi.security.truststorePasswd": "Hortonworks@123",
+                    {% if security in ('kerberos', 'ranger') %}
                     "nifi.node.ssl.isenabled": "true",
-                    "nifi.toolkit.tls.token": "Hortonworks@123",
+                    "nifi.security.keystoreType": "JKS",
                     "nifi.security.truststoreType": "JKS",
                     "nifi.security.keystorePasswd": "Hortonworks@123",
                     "nifi.security.keyPasswd": "Hortonworks@123",
+                    "nifi.security.truststorePasswd": "Hortonworks@123",
+                    {% endif %}
+                    "nifi.toolkit.tls.token": "Hortonworks@123",
                     "nifi.initial.admin.identity": "hrt_qa@HDF.COM",
                     "content": "<property name=\"Node Identity 1\">CN=%HOSTGROUP::master_2%, OU=NIFI<\/property>\n<property name=\"Node Identity 2\">CN=%HOSTGROUP::master_3%, OU=NIFI<\/property>\n<property name=\"Node Identity 3\">CN=%HOSTGROUP::master_4%, OU=NIFI<\/property>\n<property name=\"Node Identity 4\">CN=%HOSTGROUP::master_5%, OU=NIFI<\/property>\n"
                 }
