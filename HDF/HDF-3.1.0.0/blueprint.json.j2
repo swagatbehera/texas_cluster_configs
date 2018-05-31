@@ -141,6 +141,17 @@
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
           "nifi.security.identity.mapping.value.dn": "$1@$2",
           "nifi.security.identity.mapping.value.kerb": "$1@$2",
+
+          {% raw %}
+          "nifi.remote.input.host": "{{nifi_node_ssl_host}}",
+          {% endraw %}
+
+          {% else %}
+
+          {% raw %}
+          "nifi.remote.input.host": "{{nifi_node_nonssl_host}}",
+          {% endraw %}
+
           {% endif %}
           "nifi.web.https.network.interface.default": "eth0",
           "nifi.cluster.node.protocol.threads": "20",
