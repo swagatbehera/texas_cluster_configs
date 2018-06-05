@@ -1,21 +1,42 @@
 {
   "general": {
     "name": "{{ cluster_name }}",
-    "credentialName": "{{ 'ycloud' if cloud_provider == 'yarn' else 'openstack' }}"
+    {% if cloud_provider == 'yarn' %}
+    "credentialName": "ycloud"
+    {% elif cloud_provider == 'openstack' %}
+    "credentialName": "openstack"
+    {% elif cloud_provider == 'azure' %}
+    "credentialName": "qaas-cloudbreak-azure"
+    {% elif cloud_provider == 'amazon' %}
+    "credentialName": "qaas-cloudbreak-aws"
+    {% endif %}
   },
   "tags": {
     "userDefinedTags": {}
   },
-  {% if cloud_provider == 'yarn' %}
   "parameters": {
+    {% if cloud_provider == 'yarn' %}
     "yarnQueue": "qaas",
     "lifeTime": -1
+    {% elif cloud_provider == 'azure' %}
+    "encryptStorage": "false"
+    {% endif %}
+  },
+  {% if cloud_provider in ('azure', 'amazon') %}
+  "customDomain": {
+    "clusterNameAsSubdomain": false,
+    "hostgroupNameAsHostname": false
   },
   {% endif %}
   "placement": {
     {% if cloud_provider == 'openstack' %}
     "availabilityZone": "nova",
     "region": "RegionOne"
+    {% elif cloud_provider == 'azure' %}
+    "region": "North Europe"
+    {% elif cloud_provider == 'amazon' %}
+    "availabilityZone": "us-west-1a",
+    "region": "us-west-1"
     {% else %}
     "region": "default"
     {% endif %}
@@ -74,7 +95,7 @@
           "cpus": 4,
           "memory": 8192
         }
-        {% else %}
+        {% elif cloud_provider == 'openstack' %}
         "parameters": {
           "encrypted": false
         },
@@ -82,17 +103,64 @@
         "volumeType": "HDD",
         "volumeCount": 0,
         "volumeSize": 100
+        {% elif cloud_provider == 'amazon' %}
+        "parameters": {
+            "encrypted": false
+        },
+        "instanceType": "m4.xlarge",
+        "volumeType": "standard",
+        "volumeCount": 1,
+        "volumeSize": 100
+        {% elif cloud_provider == 'azure' %}
+        "parameters": {
+            "encrypted": false,
+            "managedDisk": true
+        },
+        "instanceType": "Standard_D3_v2",
+        "volumeType": "Standard_LRS",
+        "volumeCount": 1,
+        "volumeSize": 100
         {% endif %}
       },
       "nodeCount": 1,
       "group": "master_{{ node }}",
       "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
       "recoveryMode": "MANUAL",
-      {% if cloud_provider == 'openstack' %}
       "securityGroup": {
+        {% if cloud_provider == 'openstack' %}
         "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
+        {% elif cloud_provider in ('azure', 'amazon') %}
+        "securityRules": [
+          {% if node == 1 %}
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp"
+          },
+          {% endif %}
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.2/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.10/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          }
+        ]
+        {% endif %}
       },
-      {% endif %}
       "recipeNames": [
         {% if node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
@@ -108,16 +176,25 @@
     {{ '},' if node < 5 else '}' }}
     {% endfor %}
   ],
-  {% if cloud_provider == 'openstack' %}
   "network": {
+    {% if cloud_provider == 'openstack' %}
     "parameters": {
       {# See Openstack > Network > Networks #}
       "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
       "networkingOption": "provider",
       "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
     }
+    {% elif cloud_provider == 'azure' %}
+    "subnetCIDR": "10.0.0.0/16",
+    "parameters": {
+      "noFirewallRules": false,
+      "noPublicIp": false
+    }
+    {% elif cloud_provider == 'amazon' %}
+    "subnetCIDR": "10.0.0.0/16",
+    "parameters": {}
+    {% endif %}
   },
-  {% endif %}
   "stackAuthentication": {
     "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB/hBQfzF91SExZ4MglU7eX26RfIEsz5aCGzzbaGeQG7Jch5XIWHE192A/5jRUZy2eU5sFMsYS32LEqKSVJn5N/5P7yE2QvcTUosM7wHWQW4JrImL0PTJTPXRc/QvkGPka3LvBCL6PlVENyGGo+C3D+dgSloaBeZ9URk0I+Yc/VsihQoMdkVOYIKAGxZlG/JBEBBjCZ5ng4WlzdfcsKgtUGbr6nOn3mqK8/Pkv8CeWguEYaibj5Os6ydmHVZ30w0tLD6Gu7UH14M3M3LnNlCndSLG4bRzUP6OxGEFWlG8GPJnv3Z3h3obqK3jIAsx8GHR9ExR8YdNlvkigbQg8xDGJ hw-qe@hortonworks.com",
     "publicKeyId": null
