@@ -105,8 +105,13 @@
         "properties": {
           "auto.create.topics.enable": "true",
           "delete.topic.enable": "true",
-          "listeners": "SASL_PLAINTEXT://localhost:6668,PLAINTEXT://localhost:6669",
-          "security.inter.broker.protocol": "SASL_PLAINTEXT"
+          "listeners": "SASL_PLAINTEXT:\/\/localhost:6668,PLAINTEXT:\/\/localhost:6669,SSL:\/\/localhost:6670,SASL_SSL:\/\/localhost:6671",
+          "security.inter.broker.protocol": "SASL_PLAINTEXT",
+          "ssl.truststore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.truststore.jks",
+          "ssl.truststore.password": "Hortonworks!",
+          "ssl.keystore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.keystore.jks",
+          "ssl.key.password": "Hortonworks!",
+          "ssl.keystore.password": "Hortonworks!"
         }
       }
     },

@@ -1,9 +1,0 @@
-#!/bin/bash -eux
-
-{% if os.startswith('centos') %}
-yum install -y mysql-connector-java
-{% elif os.startswith('ubuntu') %}
-apt-get install -y mysql-connector-java
-{% endif %}
-mkdir -p /var/lib/ambari-server/jdbc-drivers
-cp /usr/share/java/mysql-connector-java.jar /var/lib/ambari-server/jdbc-drivers
