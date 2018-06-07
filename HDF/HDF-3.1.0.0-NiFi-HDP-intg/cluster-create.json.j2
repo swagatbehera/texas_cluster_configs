@@ -95,7 +95,6 @@
       {% endif %}
       "recipeNames": [
         {% if node == 1 %}
-        "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start",
         "{{ cluster_name }}-hdfs-setup-for-nifi-nat-sh-post-cluster-install",
         {% elif node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",

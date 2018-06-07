@@ -8,6 +8,13 @@ yum install -y mysql-connector-java
 apt-get install -y libmysql-java
 {% endif %}
 
+connector_jar=/usr/share/java/mysql-connector-java.jar
+ambari_server_path=/var/lib/ambari-server
+ambari_agent_path=/var/lib/ambari-agent
+
+[ -d  ${ambari_server_path} ] && mkdir -p ${ambari_server_path}/jdbc-drivers && cp ${connector_jar} ${ambari_server_path}/jdbc-drivers
+mkdir -p ${ambari_agent_path}/tmp/ && cp ${connector_jar} ${ambari_agent_path}/tmp/
+
 useradd nifi
 
 for i in $(seq 0 3); do

@@ -94,9 +94,7 @@
       },
       {% endif %}
       "recipeNames": [
-        {% if node == 1 %}
-        "{{ cluster_name }}-jdbc-setup-sh-pre-ambari-start",
-        {% elif node == 2 %}
+        {% if node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
         {% endif %}
         {% if cloud_provider == 'yarn' %}
