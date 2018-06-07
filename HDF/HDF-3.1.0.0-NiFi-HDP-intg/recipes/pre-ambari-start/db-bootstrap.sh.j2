@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 create_mysql_community_repo() {
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
@@ -29,6 +30,9 @@ MYSQLEOF
 
 create_db_init_sql_file() {
 	cat > /tmp/db-script.sql <<ENDDBSQLOF
+
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+
 # TODO fix this to only grant for specific db and also does not work if Ranger is on the same host as the DB
 # ranger db setup
 # CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'password';
@@ -53,9 +57,7 @@ FLUSH PRIVILEGES;
 # create database for hive
 CREATE DATABASE hive;
 CREATE USER 'hive'@'%' IDENTIFIED BY 'hive';
-CREATE USER 'hive'@'localhost' IDENTIFIED BY 'hive';
 GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 # create database for druid
@@ -80,6 +82,7 @@ GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'%' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'localhost' IDENTIFIED BY 'registry' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
+
 ENDDBSQLOF
 }
 
@@ -92,6 +95,9 @@ install_mysql_server() {
     apt-get update
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y mysql-server-5.6
+    {% elif os.startswith('debian') %}
+    export DEBIAN_FRONTEND="noninteractive"
+    apt-get install -y mysql-server
     {% endif %}
 }
 

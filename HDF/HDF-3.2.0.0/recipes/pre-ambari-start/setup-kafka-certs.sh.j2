@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # script to setup certs for kafka. The certs will be set up only if the cluster is kerberized.
 
 {% if  security in ('kerberos', 'ranger') %}

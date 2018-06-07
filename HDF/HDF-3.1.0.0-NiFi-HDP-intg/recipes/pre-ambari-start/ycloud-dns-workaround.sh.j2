@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mkdir -p /etc/unbound/conf.d
 
 cat > /etc/unbound/conf.d/99-default.conf <<EOF

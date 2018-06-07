@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # script to setup certs for kafka. The certs will be set up only if the cluster is kerberized.
 
 {% if  security in ('kerberos', 'ranger') %}
@@ -33,7 +35,6 @@ ${KEYTOOL_CMD} -keystore ${keystore_file} -alias CARoot -import -file ${SSL_DIR}
 
 ${KEYTOOL_CMD} -keystore ${keystore_file} -alias ${host} -import -file ${SSL_DIR}/cert-signed -keypass ${SSL_KEY_PASSWORD} -storepass ${SSL_STORE_PASSWORD} -noprompt
 
-# give full permissions on
 chmod 777 ${keystore_file}
 {% endif %}
 
