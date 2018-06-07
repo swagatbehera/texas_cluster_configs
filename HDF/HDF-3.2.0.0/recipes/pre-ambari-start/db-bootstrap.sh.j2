@@ -65,6 +65,23 @@ CREATE USER 'druid'@'%' IDENTIFIED BY 'druid';
 GRANT ALL PRIVILEGES ON druid.* TO 'druid'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
+# create database for streamline
+CREATE DATABASE streamline;
+CREATE USER 'streamline'@'%' IDENTIFIED BY 'streamline';
+CREATE USER 'streamline'@'localhost' IDENTIFIED BY 'streamline';
+GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'localhost' IDENTIFIED BY 'streamline' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+#create database for registry
+CREATE DATABASE registry;
+CREATE USER 'registry'@'%' IDENTIFIED BY 'registry';
+CREATE USER 'registry'@'localhost' IDENTIFIED BY 'registry';
+GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'localhost' IDENTIFIED BY 'registry' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
 ENDDBSQLOF
 }
 
