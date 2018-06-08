@@ -55,6 +55,8 @@ cd /root/infra-v2
 # Setup pyenv for running log collector
 {% if os.startswith('ubuntu') or os.startswith('debian') %}
 apt-get install -y zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev libreadline-dev
+{% elif os.startswith('centos') %}
+yum install -y zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel xz xz-devel gcc
 {% endif %}
 
 [ -d /root/.pyenv ] || git clone https://github.com/pyenv/pyenv.git /root/.pyenv
