@@ -73,16 +73,3 @@ pyenv install 3.6.4
 pyenv local 3.6.4
 
 pip install paramiko
-
-# Invoke log collection daemon
-export PYTHONPATH=/root/infra-v2
-python $PYTHONPATH/modules/log_collection/trigger/logCollectionDaemon.py \
-    --action start \
-    --cluster-name "/qaas/{{ cluster_name }}" \
-    --cloud-type kubernetes \
-    --freq 8 \
-    --sleep-time-minutes 30 \
-    --test-component qaas \
-    --working-directory $PYTHONPATH/modules/log_collection/ \
-    --log-transport-type=awscli \
-    --storage=s3
