@@ -110,13 +110,21 @@ init_db_bootstrap_script() {
 }
 
 main() {
-	{% if os.startswith('centos') %}
-	create_mysql_community_repo
-	{% endif %}
-	create_db_init_sql_file
-	install_mysql_server
-	start_mysql_server
-	init_db_bootstrap_script
+    {% if os.startswith('centos') %}
+    create_mysql_community_repo
+    {% endif %}
+
+    create_db_init_sql_file
+
+    {% if cloud_provider != 'amazon' %}
+    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
+       But it comes with a preinstalled MySQL 5.5
+    #}
+    install_mysql_server
+    {% endif %}
+
+    start_mysql_server
+    init_db_bootstrap_script
 }
 
 main
