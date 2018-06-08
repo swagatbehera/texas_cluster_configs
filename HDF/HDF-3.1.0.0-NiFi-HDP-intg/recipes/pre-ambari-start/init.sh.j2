@@ -15,7 +15,7 @@ ambari_agent_path=/var/lib/ambari-agent
 [ -d  ${ambari_server_path} ] && mkdir -p ${ambari_server_path}/jdbc-drivers && cp ${connector_jar} ${ambari_server_path}/jdbc-drivers
 mkdir -p ${ambari_agent_path}/tmp/ && cp ${connector_jar} ${ambari_agent_path}/tmp/
 
-useradd -m nifi
+id nifi || useradd -m nifi
 
 for i in $(seq 0 3); do
     rm -rf /grid/${i}/*
