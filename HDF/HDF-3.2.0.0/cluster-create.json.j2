@@ -173,7 +173,80 @@
         "{{ cluster_name }}-init-sh-pre-ambari-start",
         "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
-    {{ '},' if node < 5 else '}' }}
+    },
+    {% endfor %}
+    {% for node in range(6, 9) %}
+    {
+      "template": {
+        {% if cloud_provider == 'yarn' %}
+        "customInstanceType": {
+          "cpus": 1,
+          "memory": 1024
+        }
+        {% elif cloud_provider == 'openstack' %}
+        "parameters": {
+          "encrypted": false
+        },
+        "instanceType": "m1.medium",
+        "volumeType": "HDD",
+        "volumeCount": 0,
+        "volumeSize": 100
+        {% elif cloud_provider == 'amazon' %}
+        "parameters": {
+            "encrypted": false
+        },
+        "instanceType": "m1.small",
+        "volumeType": "standard",
+        "volumeCount": 1,
+        "volumeSize": 100
+        {% elif cloud_provider == 'azure' %}
+        "parameters": {
+            "encrypted": false,
+            "managedDisk": true
+        },
+        "instanceType": "Standard_D1_v2",
+        "volumeType": "Standard_LRS",
+        "volumeCount": 1,
+        "volumeSize": 100
+        {% endif %}
+      },
+      "nodeCount": 1,
+      "group": "master_{{ node }}",
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "securityGroup": {
+        {% if cloud_provider == 'openstack' %}
+        "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
+        {% elif cloud_provider in ('azure', 'amazon') %}
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.2/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.10/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          }
+        ]
+        {% endif %}
+      },
+      "recipeNames": [
+        {% if cloud_provider == 'yarn' %}
+        "{{ cluster_name }}-ycloud-dns-workaround-sh-pre-ambari-start",
+        {% endif %}
+        "{{ cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
+        "{{ cluster_name }}-log-collector-setup-sh-pre-ambari-start",
+        "{{ cluster_name }}-init-sh-pre-ambari-start",
+        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
+      ]
+    {{ '},' if node < 8 else '}' }}
     {% endfor %}
   ],
   "network": {
