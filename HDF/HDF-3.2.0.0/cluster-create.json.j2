@@ -87,39 +87,37 @@
     "imageCatalog": "{{ image_catalog }}"
   },
   "instanceGroups": [
-    {% for node in range(1, 6) %}
+   {% set instance_flavors = {
+    'openstack': {'small':{"instanceType":"m1.medium","volumeType":"HDD","volumeCount":0,"volumeSize": 100}, 'big': {"instanceType": "cloudbreak", "volumeType": "HDD","volumeCount": 0,"volumeSize": 100}},
+    'amazon': {'small': {"instanceType": "m1.small", "volumeType": "standard", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "m4.xlarge","volumeType": "standard", "volumeCount": 1,"volumeSize": 100}},
+    'azure': {'small': {"instanceType": "Standard_D1_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "Standard_D3_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}}
+    } %}
+{% macro node_spec(cloud_provider, instance_flavors, node) %}
     {
       "template": {
         {% if cloud_provider == 'yarn' %}
+        {% if node in range(1, 6)%}
         "customInstanceType": {
           "cpus": 4,
           "memory": 8192
         }
-        {% elif cloud_provider == 'openstack' %}
+        {% else %}
+        "customInstanceType": {
+          "cpus": 1,
+          "memory": 1024
+        }
+        {% endif %}
+        {% else %}
         "parameters": {
+          {% for key, value in kwargs.items() %}
+            "{{ key }}": "{{ value }}",
+          {% endfor %}
           "encrypted": false
         },
-        "instanceType": "cloudbreak",
-        "volumeType": "HDD",
-        "volumeCount": 0,
-        "volumeSize": 100
-        {% elif cloud_provider == 'amazon' %}
-        "parameters": {
-            "encrypted": false
-        },
-        "instanceType": "m4.xlarge",
-        "volumeType": "standard",
-        "volumeCount": 1,
-        "volumeSize": 100
-        {% elif cloud_provider == 'azure' %}
-        "parameters": {
-            "encrypted": false,
-            "managedDisk": true
-        },
-        "instanceType": "Standard_D3_v2",
-        "volumeType": "Standard_LRS",
-        "volumeCount": 1,
-        "volumeSize": 100
+        "instanceType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['instanceType'] }}",
+        "volumeType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeType'] }}",
+        "volumeCount": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeCount'] }},
+        "volumeSize": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeSize'] }}
         {% endif %}
       },
       "nodeCount": 1,
@@ -165,88 +163,19 @@
         {% if node == 2 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
         {% endif %}
-        {% if cloud_provider == 'yarn' %}
-        "{{ cluster_name }}-ycloud-dns-workaround-sh-pre-ambari-start",
-        {% endif %}
-        "{{ cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
-        "{{ cluster_name }}-log-collector-setup-sh-pre-ambari-start",
-        "{{ cluster_name }}-init-sh-pre-ambari-start",
-        "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
-      ]
-    },
-    {% endfor %}
-    {% for node in range(6, 9) %}
-    {
-      "template": {
-        {% if cloud_provider == 'yarn' %}
-        "customInstanceType": {
-          "cpus": 1,
-          "memory": 1024
-        }
-        {% elif cloud_provider == 'openstack' %}
-        "parameters": {
-          "encrypted": false
-        },
-        "instanceType": "m1.medium",
-        "volumeType": "HDD",
-        "volumeCount": 0,
-        "volumeSize": 100
-        {% elif cloud_provider == 'amazon' %}
-        "parameters": {
-            "encrypted": false
-        },
-        "instanceType": "m1.small",
-        "volumeType": "standard",
-        "volumeCount": 1,
-        "volumeSize": 100
-        {% elif cloud_provider == 'azure' %}
-        "parameters": {
-            "encrypted": false,
-            "managedDisk": true
-        },
-        "instanceType": "Standard_D1_v2",
-        "volumeType": "Standard_LRS",
-        "volumeCount": 1,
-        "volumeSize": 100
-        {% endif %}
-      },
-      "nodeCount": 1,
-      "group": "master_{{ node }}",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "securityGroup": {
-        {% if cloud_provider == 'openstack' %}
-        "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
-        {% elif cloud_provider in ('azure', 'amazon') %}
-        "securityRules": [
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": "22",
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "192.175.27.2/32",
-            "ports": "1-65000",
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "192.175.27.10/32",
-            "ports": "1-65000",
-            "protocol": "tcp"
-          }
-        ]
-        {% endif %}
-      },
-      "recipeNames": [
-        {% if cloud_provider == 'yarn' %}
-        "{{ cluster_name }}-ycloud-dns-workaround-sh-pre-ambari-start",
-        {% endif %}
         "{{ cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
         "{{ cluster_name }}-log-collector-setup-sh-pre-ambari-start",
         "{{ cluster_name }}-init-sh-pre-ambari-start",
         "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
     {{ '},' if node < 8 else '}' }}
+    {% endmacro %}
+    {% for node in range(1, 9) %}
+        {% if 'azure' in cloud_provider %}
+{{ node_spec(cloud_provider, instance_flavors, node, managedDisk=True) }}
+        {% else %}
+{{ node_spec(cloud_provider, instance_flavors, node) }}
+        {% endif %}
     {% endfor %}
   ],
   "network": {
