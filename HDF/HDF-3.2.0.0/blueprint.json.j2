@@ -302,17 +302,6 @@
         {
           "name": "INFRA_SOLR_CLIENT"
         },
-        {% if 'ranger' in security  %}
-        {
-            "name": "RANGER_ADMIN"
-        },
-        {
-            "name": "RANGER_USERSYNC"
-        },
-        {
-            "name": "RANGER_TAGSYNC"
-        },
-        {% endif %}
         {
             "name": "NIMBUS"
         },
@@ -435,6 +424,28 @@
       "name": "master_8",
       "cardinality": "1"
     }
+     {% if 'ranger' in security  %}
+     ,
+     {
+      "components": [
+        {
+            "name": "RANGER_ADMIN"
+        },
+        {
+            "name": "RANGER_USERSYNC"
+        },
+        {
+            "name": "RANGER_TAGSYNC"
+        }
+      ],
+      "configurations": [],
+      "name": "master_9",
+      "cardinality": "1"
+    }
+    {% endif %}
+
+
+
   ],
   "Blueprints": {
     "blueprint_name": "{{ cluster_name }}",
