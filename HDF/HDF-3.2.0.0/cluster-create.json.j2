@@ -87,39 +87,37 @@
     "imageCatalog": "{{ image_catalog }}"
   },
   "instanceGroups": [
-    {% for node in range(1, 6) %}
+   {% set instance_flavors = {
+    'openstack': {'small':{"instanceType":"m1.medium","volumeType":"HDD","volumeCount":0,"volumeSize": 100}, 'big': {"instanceType": "cloudbreak", "volumeType": "HDD","volumeCount": 0,"volumeSize": 100}},
+    'amazon': {'small': {"instanceType": "m1.small", "volumeType": "standard", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "m4.xlarge","volumeType": "standard", "volumeCount": 1,"volumeSize": 100}},
+    'azure': {'small': {"instanceType": "Standard_D1_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "Standard_D3_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}}
+    } %}
+{% macro node_spec(cloud_provider, instance_flavors, node) %}
     {
       "template": {
         {% if cloud_provider == 'yarn' %}
+        {% if node in range(1, 6)%}
         "customInstanceType": {
           "cpus": 4,
           "memory": 8192
         }
-        {% elif cloud_provider == 'openstack' %}
+        {% else %}
+        "customInstanceType": {
+          "cpus": 1,
+          "memory": 1024
+        }
+        {% endif %}
+        {% else %}
         "parameters": {
+          {% for key, value in kwargs.items() %}
+            "{{ key }}": "{{ value }}",
+          {% endfor %}
           "encrypted": false
         },
-        "instanceType": "cloudbreak",
-        "volumeType": "HDD",
-        "volumeCount": 0,
-        "volumeSize": 100
-        {% elif cloud_provider == 'amazon' %}
-        "parameters": {
-            "encrypted": false
-        },
-        "instanceType": "m4.xlarge",
-        "volumeType": "standard",
-        "volumeCount": 1,
-        "volumeSize": 100
-        {% elif cloud_provider == 'azure' %}
-        "parameters": {
-            "encrypted": false,
-            "managedDisk": true
-        },
-        "instanceType": "Standard_D3_v2",
-        "volumeType": "Standard_LRS",
-        "volumeCount": 1,
-        "volumeSize": 100
+        "instanceType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['instanceType'] }}",
+        "volumeType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeType'] }}",
+        "volumeCount": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeCount'] }},
+        "volumeSize": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeSize'] }}
         {% endif %}
       },
       "nodeCount": 1,
@@ -171,7 +169,14 @@
         "{{ cluster_name }}-init-sh-pre-ambari-start",
         "{{ cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
       ]
-    {{ '},' if node < 5 else '}' }}
+    {{ '},' if node < 8 else '}' }}
+    {% endmacro %}
+    {% for node in range(1, 9) %}
+        {% if 'azure' in cloud_provider %}
+{{ node_spec(cloud_provider, instance_flavors, node, managedDisk=True) }}
+        {% else %}
+{{ node_spec(cloud_provider, instance_flavors, node) }}
+        {% endif %}
     {% endfor %}
   ],
   "network": {
