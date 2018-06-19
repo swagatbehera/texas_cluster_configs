@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+
+# Setup pyenv for running log collector
+
+[ -d /root/.pyenv ] || git clone https://github.com/pyenv/pyenv.git /root/.pyenv
+
+export PYENV_ROOT=/root/.pyenv
+export PATH=$PYENV_ROOT/bin:$PATH
+
+# In some of the machines /tmp is mounted with 'noexec'. In that case python-build will fail with:
+# "python-build: TMPDIR=/tmp cannot hold executables (partition possibly mounted with `noexec`)"
+# So to avoid such failures. Setting TMPDIR to a valid directory under HOME.
+mkdir -p $HOME/python-build
+export TMPDIR="$HOME/python-build"
+
+eval "$(pyenv init -)"
+pyenv install 3.6.4
+pyenv local 3.6.4
+
+pip install paramiko==2.4.1
+
+cd /root/infra-v2
+
+# Invoke log collector
+export PYTHONPATH=/root/infra-v2
+python $PYTHONPATH/modules/log_collection/trigger/runE2E.py \
+    --cluster-name "/qaas/{{ cluster_name }}" \
+    --cloud-type kubernetes \
+    --freq 1 \
+    --sleep-time-minutes 30 \
+    --test-component qaas \
+    --working-directory $PYTHONPATH/modules/log_collection/ \
+    --log-transport-type=awscli \
+    --storage=s3

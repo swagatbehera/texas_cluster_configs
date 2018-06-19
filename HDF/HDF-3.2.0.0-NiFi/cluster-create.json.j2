@@ -160,7 +160,7 @@
         {% endif %}
       },
       "recipeNames": [
-        {% if node == 2 %}
+        {% if node == 2 or node == 5 %}
         "{{ cluster_name }}-db-bootstrap-sh-pre-ambari-start",
         {% endif %}
         "{{ cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
@@ -171,7 +171,7 @@
       ]
     }
     {% endmacro %}
-    {% set all_nodes = range(1, 6) %}
+    {% set all_nodes = range(1, 10) if security in ('kerberos', 'ranger') else range(1, 9) %}
     {% set last_item = all_nodes|length %}
     {% for node in all_nodes %}
         {% if 'azure' in cloud_provider %}
