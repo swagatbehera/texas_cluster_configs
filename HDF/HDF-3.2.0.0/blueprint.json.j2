@@ -257,9 +257,6 @@
           "name": "METRICS_GRAFANA"
         },
         {
-          "name": "NIFI_CA"
-        },
-        {
           "name": "NIMBUS"
         },
         {
@@ -270,9 +267,6 @@
         },
         {
             "name": "ZOOKEEPER_CLIENT"
-        },
-        {
-            "name": "NIFI_REGISTRY_MASTER"
         }
       ],
       "configurations": [],
@@ -303,6 +297,26 @@
           "name": "INFRA_SOLR_CLIENT"
         },
         {
+          "name": "NIFI_CA"
+        },
+        {
+            "name": "NIFI_REGISTRY_MASTER"
+        },
+        {
+          "name": "NIFI_MASTER"
+        },
+        {% if security in ('ranger') %}
+        {
+            "name": "RANGER_ADMIN"
+        },
+        {
+            "name": "RANGER_USERSYNC"
+        },
+        {
+            "name": "RANGER_TAGSYNC"
+        },
+        {% endif %}
+        {
             "name": "NIMBUS"
         },
         {
@@ -320,9 +334,6 @@
         },
         {
           "name": "SUPERVISOR"
-        },
-        {
-          "name": "NIFI_MASTER"
         },
         {
           "name": "LOGSEARCH_LOGFEEDER"
@@ -424,28 +435,6 @@
       "name": "master_8",
       "cardinality": "1"
     }
-     {% if 'ranger' in security  %}
-     ,
-     {
-      "components": [
-        {
-            "name": "RANGER_ADMIN"
-        },
-        {
-            "name": "RANGER_USERSYNC"
-        },
-        {
-            "name": "RANGER_TAGSYNC"
-        }
-      ],
-      "configurations": [],
-      "name": "master_9",
-      "cardinality": "1"
-    }
-    {% endif %}
-
-
-
   ],
   "Blueprints": {
     "blueprint_name": "{{ cluster_name }}",
