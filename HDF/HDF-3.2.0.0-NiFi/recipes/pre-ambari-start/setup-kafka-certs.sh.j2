@@ -5,9 +5,6 @@ set -e
 # script to setup certs for kafka. The certs will be set up only if the cluster is kerberized.
 
 {% if  security in ('kerberos', 'ranger') %}
-# Download the nifi-test-data-ycloud.zip from ycloud
-wget -nv -O nifi-test-data-ycloud.zip "http://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1688002886&Signature=wFgkOz4%2F9vspKpor5EYET7OodIg%3D" && \
-    unzip -q nifi-test-data-ycloud.zip -d /tmp/
 
 # get the hostname
 host=$(hostname -f)
