@@ -3,6 +3,7 @@
 set -e
 
 create_mysql_community_repo() {
+    {% if os.startswith('centos') %}
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
 [mysql-connectors-community]
 name=MySQL Connectors Community
@@ -26,6 +27,19 @@ gpgcheck=1
 gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
 
 MYSQLEOF
+    {% elif os.startswith('ubuntu') %}
+    add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
+    apt-get update
+    {% elif os.startswith('debian') %}
+    echo "No-Op: mysql packages are included in debian main repo."
+    {% elif os.startswith('sles') %}
+    wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
+    rpm -Uvh mysql80-community-release-sles12-1.noarch.rpm
+    rpm --import /etc/RPM-GPG-KEY-mysql
+    zypper modifyrepo -d mysql80-community
+    zypper modifyrepo -e mysql56-community
+    zypper refresh
+    {% endif %}
 }
 
 create_db_init_sql_file() {
@@ -91,8 +105,6 @@ install_mysql_server() {
     yum install -y mysql-community-release
     yum install -y mysql-community-server
     {% elif os.startswith('ubuntu') %}
-    add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
-    apt-get update
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y mysql-server-5.6
     {% elif os.startswith('debian') %}
@@ -101,6 +113,8 @@ install_mysql_server() {
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
     add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
     apt install -y mariadb-server mariadb-client
+    {% elif os.startswith('sles') %}
+    zypper install -y mysql-community-server
     {% endif %}
 }
 
@@ -113,16 +127,16 @@ init_db_bootstrap_script() {
 }
 
 main() {
-    {% if os.startswith('centos') %}
+    {% if cloud_provider != 'amazon' %}
+    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
+       But it comes with a preinstalled MySQL 5.5
+    #}
     create_mysql_community_repo
     {% endif %}
 
     create_db_init_sql_file
 
     {% if cloud_provider != 'amazon' %}
-    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
-       But it comes with a preinstalled MySQL 5.5
-    #}
     install_mysql_server
     {% endif %}
 
