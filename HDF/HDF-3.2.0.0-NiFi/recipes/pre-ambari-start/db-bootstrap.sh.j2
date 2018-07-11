@@ -97,7 +97,10 @@ install_mysql_server() {
     apt-get install -y mysql-server-5.6
     {% elif os.startswith('debian') %}
     export DEBIAN_FRONTEND="noninteractive"
-    apt-get install -y mysql-server
+    apt-get install -y software-properties-common dirmngr
+    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+    add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
+    apt install -y mariadb-server mariadb-client
     {% endif %}
 }
 
