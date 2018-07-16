@@ -22,6 +22,3 @@ for i in $(seq 0 3); do
     mkdir -p /grid/${i}/nifi
     chown nifi:nifi /grid/${i}/nifi
 done
-
-wget -nv -O nifi-test-data-ycloud.zip "http://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1689276536&Signature=6oMBVN7B3jErzuV7%2B%2BaOGoosMns%3D" && \
-    unzip -q nifi-test-data-ycloud.zip -d /tmp/
