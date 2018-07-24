@@ -7,6 +7,50 @@
             }
         }
     },
+    {% if 'ranger' in security  %}
+    {
+        "admin-properties": {
+            "properties": {
+                "db_root_password": "rangerdba",
+                "db_password": "rangerdba",
+                "policymgr_external_url": "http:\/\/localhost:6080",
+                "db_root_user": "rangerdba",
+                "DB_FLAVOR": "MYSQL",
+                "db_user": "rangerdba",
+                "db_name": "ranger",
+                "db_host": "localhost",
+                "SQL_CONNECTOR_JAR": "\/usr\/share\/java\/mysql-connector-java.jar"
+            }
+        }
+    },
+    {
+        "ranger-env": {
+            "properties": {
+                "is_solrCloud_enabled": "true",
+                "ranger_privelege_user_jdbc_url": "jdbc:mysql:\/\/localhost",
+                "ranger_admin_password": "Rangerpassword@123",
+                "rangerusersync_user_password": "Rangerpassword@123",
+                "rangertagsync_user_password": "Rangerpassword@123",
+                "admin_password": "Rangerpassword@123",
+                "keyadmin_user_password": "Rangerpassword@123",
+                "is_external_solrCloud_enabled": "false",
+                "is_external_solrCloud_kerberos": "false",
+                "ranger-kafka-plugin-enabled": "No",
+                "ranger-nifi-plugin-enabled": "Yes",
+                "xasecure.audit.destination.hdfs": "false"
+            }
+        }
+    },
+    {
+        "ranger-admin-site": {
+            "properties": {
+                "ranger.jpa.jdbc.driver": "com.mysql.jdbc.Driver",
+                "ranger.jpa.jdbc.url": "jdbc:mysql:\/\/localhost\/ranger",
+                "ranger.audit.source.type": "solr"
+            }
+        }
+    },
+    {% endif %}
     {
       "streamline-common": {
         "properties": {
@@ -148,6 +192,12 @@
         {
             "name": "KNOX_GATEWAY"
         }
+        {% if security in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_ADMIN"
+        }
+        {% endif %}
       ],
       "configurations": [],
       "name": "master_2",
@@ -198,6 +248,12 @@
         {
           "name": "KAFKA_BROKER"
         }
+        {% if security in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_USERSYNC"
+        }
+        {% endif %}
       ],
       "configurations": [],
       "name": "master_4",
@@ -220,6 +276,12 @@
         {
           "name": "SUPERVISOR"
         }
+        {% if security in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_TAGSYNC"
+        }
+        {% endif %}
       ],
       "configurations": [],
       "name": "master_5",
