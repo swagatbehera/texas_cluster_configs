@@ -111,6 +111,21 @@
         }
       }
     },
+    {
+      "kafka-broker": {
+        "properties": {
+          "auto.create.topics.enable": "true",
+          "delete.topic.enable": "true",
+          "listeners": "SASL_PLAINTEXT:\/\/localhost:6668,PLAINTEXT:\/\/localhost:6669,SSL:\/\/localhost:6670,SASL_SSL:\/\/localhost:6671",
+          "security.inter.broker.protocol": "SASL_PLAINTEXT",
+          "ssl.truststore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.truststore.jks",
+          "ssl.truststore.password": "Hortonworks!",
+          "ssl.keystore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.keystore.jks",
+          "ssl.key.password": "Hortonworks!",
+          "ssl.keystore.password": "Hortonworks!"
+        }
+      }
+    },
     {% endif %}
     {
       "nifi-bootstrap-env": {
@@ -191,7 +206,6 @@
             }
         }
     }
-
   ],
   "host_groups": [
     {
@@ -203,6 +217,9 @@
           "name": "METRICS_MONITOR"
         },
         {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
           "name": "INFRA_SOLR"
         },
         {
@@ -210,6 +227,9 @@
         },
         {
             "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "KAFKA_BROKER"
         }
       ],
       "configurations": [],
@@ -226,6 +246,12 @@
         },
         {
             "name": "KNOX_GATEWAY"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "METRICS_MONITOR"
         }
       ],
       "configurations": [],
@@ -236,6 +262,12 @@
       "components": [
         {
           "name": "NIFI_MASTER"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "METRICS_MONITOR"
         },
         {
             "name": "ZOOKEEPER_CLIENT"
@@ -257,6 +289,9 @@
           "name": "NIFI_MASTER"
         },
         {
+          "name": "METRICS_MONITOR"
+        },
+        {
           "name": "ZOOKEEPER_CLIENT"
         }
         {% if security in ('ranger') %}
@@ -276,6 +311,9 @@
           "name": "NIFI_MASTER"
         },
         {
+          "name": "METRICS_MONITOR"
+        },
+        {
           "name": "ZOOKEEPER_CLIENT"
         }
         {% if security in ('ranger') %}
@@ -292,6 +330,9 @@
     {
       "components": [
         {
+          "name": "METRICS_MONITOR"
+        },
+        {
           "name": "ZOOKEEPER_SERVER"
         }
       ],
@@ -302,6 +343,9 @@
     {
       "components": [
         {
+          "name": "METRICS_MONITOR"
+        },
+        {
           "name": "ZOOKEEPER_SERVER"
         }
       ],
@@ -311,6 +355,9 @@
     },
     {
       "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
         {
           "name": "ZOOKEEPER_SERVER"
         }
@@ -328,6 +375,9 @@
           "name": "NIFI_CA"
         },
         {
+          "name": "METRICS_MONITOR"
+        },
+        {
           "name": "ZOOKEEPER_CLIENT"
         }
       ],
@@ -336,11 +386,6 @@
       "cardinality": "1"
     }
     {% endif %}
-
-
-
-
-
   ],
   "Blueprints": {
     "blueprint_name": "{{ cluster_name }}",
