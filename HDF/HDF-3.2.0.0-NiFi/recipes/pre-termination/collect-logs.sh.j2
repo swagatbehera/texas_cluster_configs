@@ -26,7 +26,7 @@ cd /root/infra-v2
 # Invoke log collector
 export PYTHONPATH=/root/infra-v2
 python $PYTHONPATH/modules/log_collection/trigger/runE2E.py \
-    --cluster-name "/qaas/{{ cluster_name }}" \
+    --cluster-name "/qaas/{{ job_name }}" \
     --cloud-type kubernetes \
     --freq 1 \
     --sleep-time-minutes 30 \
