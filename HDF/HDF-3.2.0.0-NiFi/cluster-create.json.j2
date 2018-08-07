@@ -16,7 +16,7 @@
   },
   "parameters": {
     {% if cloud_provider == 'yarn' %}
-    "yarnQueue": "qaas",
+    "yarnQueue": "{{ ycloud_queue }}",
     "lifeTime": -1
     {% elif cloud_provider == 'azure' %}
     "encryptStorage": "false"

@@ -8,7 +8,7 @@
   },
   {% if cloud_provider == 'yarn' %}
   "parameters": {
-    "yarnQueue": "qaas",
+    "yarnQueue": "{{ ycloud_queue }}",
     "lifeTime": -1
   },
   {% endif %}
