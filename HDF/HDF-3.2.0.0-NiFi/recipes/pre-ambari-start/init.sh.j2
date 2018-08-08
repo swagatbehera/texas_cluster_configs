@@ -2,11 +2,11 @@
 
 set -eux
 
-{% if os.startswith('centos') %}
+{% if cloudbreak.operating_system.startswith('centos') %}
 yum install -y mysql-connector-java
-{% elif os.startswith('ubuntu') or os.startswith('debian') %}
+{% elif cloudbreak.operating_system.startswith('ubuntu') or cloudbreak.operating_system.startswith('debian') %}
 apt-get install -y libmysql-java
-{% elif os.startswith('sles') %}
+{% elif cloudbreak.operating_system.startswith('sles') %}
 wget https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-java-8.0.11-1.sles12.noarch.rpm
 rpm -ivh mysql-connector-java-8.0.11-1.sles12.noarch.rpm || true
 cp /usr/share/java/mysql-connector-java-8.0.11.jar /usr/share/java/mysql-connector-java.jar
@@ -19,7 +19,7 @@ ambari_agent_path=/var/lib/ambari-agent
 [ -d  ${ambari_server_path} ] && mkdir -p ${ambari_server_path}/jdbc-drivers && cp ${connector_jar} ${ambari_server_path}/jdbc-drivers
 mkdir -p ${ambari_agent_path}/tmp/ && cp ${connector_jar} ${ambari_agent_path}/tmp/
 
-{% if os.startswith('sles') %}
+{% if cloudbreak.operating_system.startswith('sles') %}
 # SuSE needs to be registered to have a successful install via Cloudbreak
 # XXX: This reg code will expire at 2018. 09. 10.
 SUSE_REGISTRATION_CODE=C69BBD8251EF88

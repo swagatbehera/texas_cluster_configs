@@ -7,7 +7,7 @@
             }
         }
     },
-    {% if 'ranger' in security  %}
+    {% if 'ranger' in security.value  %}
     {
         "admin-properties": {
             "properties": {
@@ -64,7 +64,7 @@
     {
       "nifi-ambari-ssl-config": {
         "properties": {
-          {% if security in ('kerberos', 'ranger') %}
+          {% if security.value in ('kerberos', 'ranger') %}
           "nifi.node.ssl.isenabled": "true",
           "nifi.security.keystoreType": "JKS",
           "nifi.security.truststoreType": "JKS",
@@ -91,7 +91,7 @@
         }
       }
     },
-    {% if security in ('kerberos', 'ranger') %}
+    {% if security.value in ('kerberos', 'ranger') %}
     {
       "kerberos-env": {
         "properties" : {
@@ -139,7 +139,7 @@
     {
       "nifi-properties": {
         "properties": {
-          {% if security in ('kerberos', 'ranger') %}
+          {% if security.value in ('kerberos', 'ranger') %}
           "nifi.security.user.login.identity.provider": "kerberos-provider",
           "nifi.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
           "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
@@ -173,7 +173,7 @@
     {
       "nifi-registry-properties": {
            "properties": {
-                {% if security in ('kerberos', 'ranger') %}
+                {% if security.value in ('kerberos', 'ranger') %}
                 "nifi.registry.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
                 "nifi.registry.security.identity.mapping.value.dn": "$1@$2",
                 "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)\/instance@(.*?)$",
@@ -186,7 +186,7 @@
     {
       "nifi-registry-ambari-ssl-config": {
           "properties": {
-                {% if security in ('kerberos', 'ranger') %}
+                {% if security.value in ('kerberos', 'ranger') %}
                 "nifi.registry.ssl.isenabled": "true",
                 "nifi.registry.initial.admin.identity": "hrt_qa@HDF.COM",
                 "nifi.registry.security.keyPasswd": "qwertyuiop[]1234",
@@ -272,7 +272,7 @@
         {
             "name": "ZOOKEEPER_CLIENT"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_TAGSYNC"
@@ -294,7 +294,7 @@
         {
           "name": "ZOOKEEPER_CLIENT"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_USERSYNC"
@@ -316,7 +316,7 @@
         {
           "name": "ZOOKEEPER_CLIENT"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_ADMIN"
@@ -367,7 +367,7 @@
       "cardinality": "1"
     }
 
-    {% if security in ('kerberos', 'ranger') %}
+    {% if security.value in ('kerberos', 'ranger') %}
     ,
     {
       "components": [
@@ -388,7 +388,7 @@
     {% endif %}
   ],
   "Blueprints": {
-    "blueprint_name": "{{ cluster_name }}",
+    "blueprint_name": "{{ generated.cluster_name }}",
     "stack_name": "{{ stack }}",
     "stack_version": "{{ stack_major_version }}"
   }

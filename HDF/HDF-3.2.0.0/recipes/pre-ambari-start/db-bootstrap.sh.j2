@@ -3,7 +3,7 @@
 set -e
 
 create_mysql_community_repo() {
-    {% if os.startswith('centos') %}
+    {% if cloudbreak.operating_system.startswith('centos') %}
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
 [mysql-connectors-community]
 name=MySQL Connectors Community
@@ -27,12 +27,12 @@ gpgcheck=1
 gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
 
 MYSQLEOF
-    {% elif os.startswith('ubuntu') %}
+    {% elif cloudbreak.operating_system.startswith('ubuntu') %}
     add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
     apt-get update
-    {% elif os.startswith('debian') %}
+    {% elif cloudbreak.operating_system.startswith('debian') %}
     echo "No-Op: mysql packages are included in debian main repo."
-    {% elif os.startswith('sles') %}
+    {% elif cloudbreak.operating_system.startswith('sles') %}
     wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
     rpm -Uvh mysql80-community-release-sles12-1.noarch.rpm
     rpm --import /etc/RPM-GPG-KEY-mysql
@@ -101,26 +101,26 @@ ENDDBSQLOF
 }
 
 install_mysql_server() {
-    {% if os.startswith('centos') %}
+    {% if cloudbreak.operating_system.startswith('centos') %}
     yum install -y mysql-community-release
     yum install -y mysql-community-server
-    {% elif os.startswith('ubuntu') %}
+    {% elif cloudbreak.operating_system.startswith('ubuntu') %}
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y mysql-server-5.6
-    {% elif os.startswith('debian') %}
+    {% elif cloudbreak.operating_system.startswith('debian') %}
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y software-properties-common dirmngr
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
     add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
     apt-get update
     apt-get install -y mariadb-server mariadb-client
-    {% elif os.startswith('sles') %}
+    {% elif cloudbreak.operating_system.startswith('sles') %}
     zypper install -y mysql-community-server
     {% endif %}
 }
 
 start_mysql_server() {
-	service {{ 'mysqld' if os.startswith('centos') else 'mysql' }} start
+	service {{ 'mysqld' if cloudbreak.operating_system.startswith('centos') else 'mysql' }} start
 }
 
 init_db_bootstrap_script() {
@@ -128,7 +128,7 @@ init_db_bootstrap_script() {
 }
 
 main() {
-    {% if cloud_provider != 'amazon' %}
+    {% if cloudbreak.cloud_provider != 'amazon' %}
     {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
        But it comes with a preinstalled MySQL 5.5
     #}
@@ -137,7 +137,7 @@ main() {
 
     create_db_init_sql_file
 
-    {% if cloud_provider != 'amazon' %}
+    {% if cloudbreak.cloud_provider != 'amazon' %}
     install_mysql_server
     {% endif %}
 

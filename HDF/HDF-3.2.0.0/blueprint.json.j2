@@ -7,7 +7,7 @@
             }
         }
     },
-    {% if 'ranger' in security  %}
+    {% if 'ranger' in security.value  %}
     {
         "admin-properties": {
             "properties": {
@@ -81,7 +81,7 @@
         }
       }
     }
-    {% if security in ('kerberos', 'ranger') %}
+    {% if security.value in ('kerberos', 'ranger') %}
     ,
     {
       "kafka-broker": {
@@ -99,7 +99,7 @@
       }
     }
     {% endif %}
-    {% if security in ('kerberos', 'ranger') %}
+    {% if security.value in ('kerberos', 'ranger') %}
     ,
     {
       "kerberos-env": {
@@ -201,7 +201,7 @@
         {
             "name": "KNOX_GATEWAY"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_ADMIN"
@@ -263,7 +263,7 @@
         {
           "name": "KAFKA_BROKER"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_USERSYNC"
@@ -294,7 +294,7 @@
         {
           "name": "SUPERVISOR"
         }
-        {% if security in ('ranger') %}
+        {% if security.value in ('ranger') %}
         ,
         {
             "name": "RANGER_TAGSYNC"
@@ -307,7 +307,7 @@
     }
   ],
   "Blueprints": {
-    "blueprint_name": "{{ cluster_name }}",
+    "blueprint_name": "{{ generated.cluster_name }}",
     "stack_name": "{{ stack }}",
     "stack_version": "{{ stack_major_version }}"
   }

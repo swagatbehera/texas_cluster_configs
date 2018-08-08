@@ -1,6 +1,6 @@
 {
     "Blueprints": {
-        "blueprint_name": "{{ cluster_name }}",
+        "blueprint_name": "{{ generated.cluster_name }}",
         "stack_name": "{{ stack }}",
         "stack_version": "{{ stack_major_version }}"
     },
@@ -96,7 +96,7 @@
                 {
                     "name": "HIVE_METASTORE"
                 },
-                {% if 'ranger' in security %}
+                {% if 'ranger' in security.value %}
                 {
                     "name": "RANGER_TAGSYNC"
                 },
@@ -311,9 +311,9 @@
         {
             "core-site": {
                 "properties": {
-                    "fs.defaultFS": "hdfs:\/\/{{ cluster_name }}",
-                    "hadoop.proxyuser.ambari-server-{{ cluster_name }}.groups": "*",
-                    "hadoop.proxyuser.ambari-server-{{ cluster_name }}.hosts": "*",
+                    "fs.defaultFS": "hdfs:\/\/{{ generated.cluster_name }}",
+                    "hadoop.proxyuser.ambari-server-{{ generated.cluster_name }}.groups": "*",
+                    "hadoop.proxyuser.ambari-server-{{ generated.cluster_name }}.hosts": "*",
                     "ha.zookeeper.quorum": "%HOSTGROUP::master_1%:2181,%HOSTGROUP::master_2%:2181,%HOSTGROUP::master_3%:2181",
                     "ipc.server.tcpnodelay": "true",
                     "hadoop.security.key.provider.path": "kms:\/\/http@%HOSTGROUP::master_2%:9292\/kms",
@@ -343,17 +343,17 @@
                     "dfs.encryption.key.provider.uri": "kms:\/\/http@%HOSTGROUP::master_2%:9292\/kms",
                     "dfs.datanode.failed.volumes.tolerated": "0",
                     "dfs.journalnode.edits.dir": "\/hadoop\/hdfs\/journal",
-                    "dfs.client.failover.proxy.provider.{{ cluster_name }}": "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
-                    "dfs.ha.namenodes.{{ cluster_name }}": "nn1,nn2",
-                    "dfs.namenode.http-address.{{ cluster_name }}.nn1": "%HOSTGROUP::master_1%:50070",
-                    "dfs.namenode.http-address.{{ cluster_name }}.nn2": "%HOSTGROUP::master_3%:50070",
-                    "dfs.namenode.https-address.{{ cluster_name }}.nn1": "%HOSTGROUP::master_1%:50470",
-                    "dfs.namenode.https-address.{{ cluster_name }}.nn2": "%HOSTGROUP::master_3%:50470",
-                    "dfs.namenode.rpc-address.{{ cluster_name }}.nn1": "%HOSTGROUP::master_1%:8020",
-                    "dfs.namenode.rpc-address.{{ cluster_name }}.nn2": "%HOSTGROUP::master_3%:8020",
-                    "dfs.namenode.shared.edits.dir": "qjournal:\/\/%HOSTGROUP::master_1%:8485;%HOSTGROUP::master_2%:8485;%HOSTGROUP::master_3%:8485\/{{ cluster_name }}",
-                    "dfs.nameservices": "{{ cluster_name }}",
-                    "dfs.internal.nameservices": "{{ cluster_name }}"
+                    "dfs.client.failover.proxy.provider.{{ generated.cluster_name }}": "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+                    "dfs.ha.namenodes.{{ generated.cluster_name }}": "nn1,nn2",
+                    "dfs.namenode.http-address.{{ generated.cluster_name }}.nn1": "%HOSTGROUP::master_1%:50070",
+                    "dfs.namenode.http-address.{{ generated.cluster_name }}.nn2": "%HOSTGROUP::master_3%:50070",
+                    "dfs.namenode.https-address.{{ generated.cluster_name }}.nn1": "%HOSTGROUP::master_1%:50470",
+                    "dfs.namenode.https-address.{{ generated.cluster_name }}.nn2": "%HOSTGROUP::master_3%:50470",
+                    "dfs.namenode.rpc-address.{{ generated.cluster_name }}.nn1": "%HOSTGROUP::master_1%:8020",
+                    "dfs.namenode.rpc-address.{{ generated.cluster_name }}.nn2": "%HOSTGROUP::master_3%:8020",
+                    "dfs.namenode.shared.edits.dir": "qjournal:\/\/%HOSTGROUP::master_1%:8485;%HOSTGROUP::master_2%:8485;%HOSTGROUP::master_3%:8485\/{{ generated.cluster_name }}",
+                    "dfs.nameservices": "{{ generated.cluster_name }}",
+                    "dfs.internal.nameservices": "{{ generated.cluster_name }}"
                 }
             }
         },
@@ -392,7 +392,7 @@
                     "rangerusersync_user_password": "Rangerpassword@123",
                     "rangertagsync_user_password": "Rangerpassword@123",
                     "keyadmin_user_password": "Rangerpassword@123",
-                    {% if 'ranger' in security %}
+                    {% if 'ranger' in security.value %}
                     "ranger-kafka-plugin-enabled": "No",
                     "ranger-nifi-plugin-enabled": "Yes",
                     {% endif %}
@@ -517,7 +517,7 @@
         {
             "hbase-site": {
                 "properties": {
-                    "hbase.rootdir": "hdfs:\/\/{{ cluster_name }}\/apps\/hbase\/data"
+                    "hbase.rootdir": "hdfs:\/\/{{ generated.cluster_name }}\/apps\/hbase\/data"
                 }
             }
         },
@@ -573,7 +573,7 @@
         {
             "nifi-ambari-ssl-config": {
                 "properties": {
-                    {% if security in ('kerberos', 'ranger') %}
+                    {% if security.value in ('kerberos', 'ranger') %}
                     "nifi.node.ssl.isenabled": "true",
                     "nifi.security.keystoreType": "JKS",
                     "nifi.security.truststoreType": "JKS",
@@ -589,7 +589,7 @@
         {
           "nifi-properties": {
             "properties": {
-              {% if  security in ('kerberos', 'ranger') %}
+              {% if  security.value in ('kerberos', 'ranger') %}
               "nifi.security.user.login.identity.provider": "kerberos-provider",
               "nifi.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
               "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
@@ -620,7 +620,7 @@
             }
           }
         },
-        {% if security in ('kerberos', 'ranger') %}
+        {% if security.value in ('kerberos', 'ranger') %}
         {
           "kerberos-env": {
             "properties" : {

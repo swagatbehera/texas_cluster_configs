@@ -53,8 +53,8 @@ chmod 0600 /root/.ssh/config
 cd /root/infra-v2
 
 # Install pre-requisites for pyenv setup
-{% if os.startswith('ubuntu') or os.startswith('debian') %}
+{% if cloudbreak.operating_system.startswith('ubuntu') or cloudbreak.operating_system.startswith('debian') %}
 apt-get install -y zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev libreadline-dev
-{% elif os.startswith('centos') %}
+{% elif cloudbreak.operating_system.startswith('centos') %}
 yum install -y zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel xz xz-devel gcc
 {% endif %}
