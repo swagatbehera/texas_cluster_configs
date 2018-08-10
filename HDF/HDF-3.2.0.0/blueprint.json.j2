@@ -56,11 +56,17 @@
         "properties": {
           "database_name": "streamline",
           "streamline.storage.connector.user": "streamline",
+          {% if cloudbreak.operating_system.startswith('sles') %}
+          "streamline.storage.type": "postgresql",
+          "streamline.storage.connector.connectURI": "jdbc:postgresql://%HOSTGROUP::master_2%:5432/streamline",
+          "streamline.storage.db.hostname": "localhost:5432",
+          {% else %}
           "streamline.storage.type": "mysql",
+          "streamline.storage.connector.connectURI": "jdbc:mysql://%HOSTGROUP::master_2%:3306/streamline",
+          {% endif %}
           "registry.url": "http://%HOSTGROUP::master_2%:7788/api/v1",
           "streamline.dashboard.url": "http://%HOSTGROUP::master_2%:9090",
           "streamline.storage.connector.password": "streamline",
-          "streamline.storage.connector.connectURI": "jdbc:mysql://%HOSTGROUP::master_2%:3306/streamline",
           "jar.storage.type": "local",
           "db_root_user": "root",
           "db_root_password": "root"
@@ -72,9 +78,15 @@
         "properties": {
           "database_name": "registry",
           "registry.storage.connector.user": "registry",
+          {% if cloudbreak.operating_system.startswith('sles') %}
+          "registry.storage.type": "postgresql",
+          "registry.storage.connector.connectURI": "jdbc:postgresql:\/\/%HOSTGROUP::master_2%:5432\/registry",
+          "registry.storage.db.hostname": "localhost:5432",
+          {% else %}
           "registry.storage.type": "mysql",
-          "registry.storage.connector.password": "registry",
           "registry.storage.connector.connectURI": "jdbc:mysql:\/\/%HOSTGROUP::master_2%:3306\/registry",
+          {% endif %}
+          "registry.storage.connector.password": "registry",
           "jar.storage.type": "local",
           "db_root_user": "root",
           "db_root_password": "root"

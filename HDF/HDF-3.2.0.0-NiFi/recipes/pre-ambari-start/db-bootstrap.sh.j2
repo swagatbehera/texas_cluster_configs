@@ -2,6 +2,8 @@
 
 set -e
 
+PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
+
 create_mysql_community_repo() {
     {% if cloudbreak.operating_system.startswith('centos') %}
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
@@ -100,6 +102,17 @@ FLUSH PRIVILEGES;
 ENDDBSQLOF
 }
 
+create_db_init_sql_file_psql() {
+{% if cloudbreak.operating_system.startswith('sles') %}
+    cat > $PSQL_SETUP_SQL_PATH <<ENDDBSQLOF
+create database registry;
+CREATE USER registry WITH PASSWORD 'registry';
+GRANT ALL PRIVILEGES ON DATABASE "registry" to registry;
+
+ENDDBSQLOF
+{% endif %}
+}
+
 install_mysql_server() {
     {% if cloudbreak.operating_system.startswith('centos') %}
     yum install -y mysql-community-release
@@ -120,10 +133,27 @@ install_mysql_server() {
 
 start_mysql_server() {
 	service {{ 'mysqld' if cloudbreak.operating_system.startswith('centos') else 'mysql' }} start
+	{% if cloudbreak.operating_system.startswith('sles') %}
+	PSQL_DATA_DIR=/var/lib/pgsql/data/
+	rm -rvf $PSQL_DATA_DIR/*
+	sudo -u postgres initdb $PSQL_DATA_DIR --auth=trust --auth-host=trust --auth-local=trust
+	echo "listen_addresses = '*'" >> /var/lib/pgsql/data/postgresql.conf
+	echo "host    all             all             0.0.0.0/0            trust" >> /var/lib/pgsql/data/pg_hba.conf
+    systemctl enable postgresql.service
+	service postgresql start
+
+	{% endif %}
 }
 
 init_db_bootstrap_script() {
 	mysql -u root < /tmp/db-script.sql
+}
+
+init_db_bootstrap_script_psql() {
+    {% if cloudbreak.operating_system.startswith('sles') %}
+    chmod o+r $PSQL_SETUP_SQL_PATH
+    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
+    {% endif %}
 }
 
 main() {
@@ -135,6 +165,8 @@ main() {
     {% endif %}
 
     create_db_init_sql_file
+    create_db_init_sql_file_psql
+
 
     {% if cloudbreak.cloud_provider != 'amazon' %}
     install_mysql_server
@@ -142,6 +174,7 @@ main() {
 
     start_mysql_server
     init_db_bootstrap_script
+    init_db_bootstrap_script_psql
 }
 
 main

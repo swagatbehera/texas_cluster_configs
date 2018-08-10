@@ -82,9 +82,15 @@
         "properties": {
           "database_name": "registry",
           "registry.storage.connector.user": "registry",
+          {% if cloudbreak.operating_system.startswith('sles') %}
+          "registry.storage.type": "postgresql",
+          "registry.storage.connector.connectURI": "jdbc:postgresql:\/\/%HOSTGROUP::master_2%:5432\/registry",
+          "registry.storage.db.hostname": "localhost:5432",
+          {% else %}
           "registry.storage.type": "mysql",
-          "registry.storage.connector.password": "registry",
           "registry.storage.connector.connectURI": "jdbc:mysql:\/\/localhost:3306\/registry",
+          {% endif %}
+          "registry.storage.connector.password": "registry",
           "jar.storage.type": "local",
           "db_root_user": "root",
           "db_root_password": "root"
