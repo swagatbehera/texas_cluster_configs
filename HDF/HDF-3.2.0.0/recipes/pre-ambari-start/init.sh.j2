@@ -2,11 +2,23 @@
 
 set -eux
 
+remove_obsolete_repos() {
+    zypper rr http://download.opensuse.org/repositories/devel:/languages:/python/SLE_12_SP3/
+}
+
+setup_sles_ntpd() {
+  zypper --non-interactive install ntp
+  systemctl enable ntpd.service
+  systemctl start ntpd.service
+}
+
 {% if cloudbreak.operating_system.startswith('centos') %}
 yum install -y mysql-connector-java
 {% elif cloudbreak.operating_system.startswith('ubuntu') or cloudbreak.operating_system.startswith('debian') %}
 apt-get install -y libmysql-java
 {% elif cloudbreak.operating_system.startswith('sles') %}
+remove_obsolete_repos
+setup_sles_ntpd
 wget https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-java-8.0.11-1.sles12.noarch.rpm
 rpm -ivh mysql-connector-java-8.0.11-1.sles12.noarch.rpm || true
 cp /usr/share/java/mysql-connector-java-8.0.11.jar /usr/share/java/mysql-connector-java.jar
