@@ -2,8 +2,6 @@
 
 set -e
 
-PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
-
 create_mysql_community_repo() {
     {% if cloudbreak.operating_system.startswith('centos') %}
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
@@ -36,7 +34,7 @@ MYSQLEOF
     echo "No-Op: mysql packages are included in debian main repo."
     {% elif cloudbreak.operating_system.startswith('sles') %}
     wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
-    rpm -Uvh mysql80-community-release-sles12-1.noarch.rpm
+    rpm -Uvh --replacepkgs mysql80-community-release-sles12-1.noarch.rpm
     rpm --import /etc/RPM-GPG-KEY-mysql
     zypper modifyrepo -d mysql80-community
     zypper modifyrepo -e mysql56-community
@@ -102,8 +100,10 @@ FLUSH PRIVILEGES;
 ENDDBSQLOF
 }
 
-create_db_init_sql_file_psql() {
 {% if cloudbreak.operating_system.startswith('sles') %}
+PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
+
+create_db_init_sql_file_psql() {
     cat > $PSQL_SETUP_SQL_PATH <<ENDDBSQLOF
 create database registry;
 CREATE USER registry WITH PASSWORD 'registry';
@@ -114,8 +114,13 @@ CREATE USER streamline WITH PASSWORD 'streamline';
 GRANT ALL PRIVILEGES ON DATABASE "streamline" to streamline;
 
 ENDDBSQLOF
-{% endif %}
 }
+
+init_db_bootstrap_script_psql() {
+    chmod o+r $PSQL_SETUP_SQL_PATH
+    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
+}
+{% endif %}
 
 install_mysql_server() {
     {% if cloudbreak.operating_system.startswith('centos') %}
@@ -155,13 +160,6 @@ init_db_bootstrap_script() {
 	mysql -u root < /tmp/db-script.sql
 }
 
-init_db_bootstrap_script_psql() {
-    {% if cloudbreak.operating_system.startswith('sles') %}
-    chmod o+r $PSQL_SETUP_SQL_PATH
-    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
-    {% endif %}
-}
-
 main() {
     {% if cloudbreak.cloud_provider != 'amazon' %}
     {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
@@ -171,7 +169,9 @@ main() {
     {% endif %}
 
     create_db_init_sql_file
+    {% if cloudbreak.operating_system.startswith('sles') %}
     create_db_init_sql_file_psql
+    {% endif %}
 
     {% if cloudbreak.cloud_provider != 'amazon' %}
     install_mysql_server
@@ -179,7 +179,9 @@ main() {
 
     start_mysql_server
     init_db_bootstrap_script
+    {% if cloudbreak.operating_system.startswith('sles') %}
     init_db_bootstrap_script_psql
+    {% endif %}
 }
 
 main
