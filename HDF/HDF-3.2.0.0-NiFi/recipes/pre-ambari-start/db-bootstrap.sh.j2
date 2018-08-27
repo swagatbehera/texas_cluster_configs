@@ -130,6 +130,8 @@ install_mysql_server() {
     apt-get install -y software-properties-common dirmngr
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
     add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
+    # apt-get update is needed for seeing packages in the newly added repo
+    apt-get update
     apt install -y mariadb-server mariadb-client
     {% elif cloudbreak.operating_system.startswith('sles') %}
     zypper install -y mysql-community-server
