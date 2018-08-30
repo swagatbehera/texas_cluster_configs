@@ -393,6 +393,87 @@
     }
     {% endif %}
   ],
+  "settings" : [
+    {
+      "recovery_settings" : [
+        {
+          "recovery_enabled" : "true"
+        }
+      ]
+    },
+    {
+      "service_settings" : [
+        {
+          "recovery_enabled" : "true",
+          "name" : "AMBARI_INFRA_SOLR"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KERBEROS"
+        },
+        {
+          "recovery_enabled" : "false",
+          "name" : "NIFI"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KNOX"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KAFKA"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "REGISTRY"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "ZOOKEEPER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "AMBARI_METRICS"
+        }
+      ]
+    },
+    {
+      "component_settings" : [
+        {
+          "recovery_enabled" : "true",
+          "name" : "ZOOKEEPER_SERVER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KERBEROS_CLIENT"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KNOX_GATEWAY"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "METRICS_MONITOR"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KAFKA_BROKER"
+        },
+        {
+          "recovery_enabled" : "false",
+          "name" : "NIFI_MASTER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "REGISTRY_SERVER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "INFRA_SOLR_CLIENT"
+        }
+      ]
+    }
+    ],
   "Blueprints": {
     "blueprint_name": "{{ generated.cluster_name }}",
     "stack_name": "{{ stack }}",
