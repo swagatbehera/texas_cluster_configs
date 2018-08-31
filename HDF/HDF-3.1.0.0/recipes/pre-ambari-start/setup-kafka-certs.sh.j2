@@ -3,8 +3,15 @@
 set -e
 
 # always download this zip
-wget -nv -O nifi-test-data-ycloud.zip "http://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1689276536&Signature=6oMBVN7B3jErzuV7%2B%2BaOGoosMns%3D" && \
-    unzip -q nifi-test-data-ycloud.zip -d /tmp/
+# zip with configs of longrunnings and dependency jars
+wget -nv -O nifi-test-data-ycloud--confs.zip "https://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud--confs.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1693510093&Signature=wU7cQDtF8vYxXdy47yNeEpDbrbE%3D" && \
+    unzip -q nifi-test-data-ycloud--confs.zip -d /tmp/nifi-test-data-ycloud/ && \
+    chmod 0777 /tmp/nifi-test-data-ycloud -R
+
+# zip containing keytabs
+wget -nv -O nifi-test-data-ycloud--keytabs.zip "https://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud--keytabs.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1693510142&Signature=gdhcrLZ7nc%2FFq4h6T8PQy%2B%2FtJBg%3D" && \
+    unzip -q nifi-test-data-ycloud--keytabs.zip -d /tmp/nifi-test-data-ycloud/ && \
+    chmod 0777 /tmp/nifi-test-data-ycloud -R
 
 # script to setup certs for kafka. The certs will be set up only if the cluster is kerberized.
 
