@@ -4,7 +4,7 @@ set -e
 
 # always download this zip
 # zip with configs of longrunnings and dependency jars
-wget -nv -O nifi-test-data-ycloud--confs.zip "https://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud--confs.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1693510093&Signature=wU7cQDtF8vYxXdy47yNeEpDbrbE%3D" && \
+wget -nv -O nifi-test-data-ycloud--confs.zip "http://qe-repo.s3.amazonaws.com/nifi/nifi-test-data-ycloud--confs.zip?AWSAccessKeyId=AKIAIDZB7JJ5YBYI23KQ&Expires=1693937939&Signature=SbFxJXlbOCSJsSP0OGgzJ1MXHDg%3D" && \
     unzip -q nifi-test-data-ycloud--confs.zip -d /tmp/nifi-test-data-ycloud/ && \
     chmod 0777 /tmp/nifi-test-data-ycloud -R
 
