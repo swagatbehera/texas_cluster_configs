@@ -174,7 +174,13 @@
           "nifi.security.user.login.identity.provider": "",
 
           {% endif %}
+
+          {% if cloudbreak.operating_system.startswith('ubuntu') %}
+          "nifi.web.https.network.interface.default": "ens3",
+          {% else %}
           "nifi.web.https.network.interface.default": "eth0",
+          {% endif %}
+
           "nifi.cluster.node.protocol.threads": "20",
           "nifi.cluster.node.connection.timeout": "30 secs",
           "nifi.cluster.node.read.timeout": "30 secs",

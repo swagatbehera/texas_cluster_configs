@@ -28,8 +28,8 @@ mkdir -p ${ambari_agent_path}/tmp/ && cp ${connector_jar} ${ambari_agent_path}/t
 
 {% if cloudbreak.operating_system.startswith('sles') %}
 # SuSE needs to be registered to have a successful install via Cloudbreak
-# XXX: This reg code will expire at 2018. 09. 10.
-SUSE_REGISTRATION_CODE=C69BBD8251EF88
+# XXX: Evaluation SUSE Linux Enterprise Server, x86-64, Developer Subscription, 1 yr - Valid until Apr 3 2019
+SUSE_REGISTRATION_CODE=D6F31998B06300
 SUSEConnect -r ${SUSE_REGISTRATION_CODE}
 SUSEConnect -p sle-sdk/12.3/x86_64
 
