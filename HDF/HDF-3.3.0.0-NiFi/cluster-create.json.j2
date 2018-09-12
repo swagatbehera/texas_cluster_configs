@@ -160,6 +160,9 @@
         {% endif %}
       },
       "recipeNames": [
+        {% if node == 1 %}
+        "{{ generated.cluster_name }}-install-openldap-sh-pre-ambari-start",
+        {% endif %}
         {% if node == 2 or node == 5 %}
         "{{ generated.cluster_name }}-db-bootstrap-sh-pre-ambari-start",
         {% endif %}
