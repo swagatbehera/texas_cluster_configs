@@ -1,0 +1,491 @@
+{
+  "configurations": [
+    {
+        "cluster-env": {
+            "properties": {
+                "command_retry_max_time_in_sec": "1200"
+            }
+        }
+    },
+    {% if 'ranger' in security.value  %}
+    {
+        "admin-properties": {
+            "properties": {
+                "db_root_password": "rangerdba",
+                "db_password": "rangerdba",
+                "policymgr_external_url": "http:\/\/localhost:6080",
+                "db_root_user": "rangerdba",
+                "DB_FLAVOR": "MYSQL",
+                "db_user": "rangerdba",
+                "db_name": "ranger",
+                "db_host": "localhost",
+                "SQL_CONNECTOR_JAR": "\/usr\/share\/java\/mysql-connector-java.jar"
+            }
+        }
+    },
+    {
+        "ranger-env": {
+            "properties": {
+                "is_solrCloud_enabled": "true",
+                "ranger_privelege_user_jdbc_url": "jdbc:mysql:\/\/localhost",
+                "ranger_admin_password": "Rangerpassword@123",
+                "rangerusersync_user_password": "Rangerpassword@123",
+                "rangertagsync_user_password": "Rangerpassword@123",
+                "admin_password": "Rangerpassword@123",
+                "keyadmin_user_password": "Rangerpassword@123",
+                "is_external_solrCloud_enabled": "false",
+                "is_external_solrCloud_kerberos": "false",
+                "ranger-kafka-plugin-enabled": "No",
+                "ranger-nifi-plugin-enabled": "Yes",
+                "xasecure.audit.destination.hdfs": "false"
+            }
+        }
+    },
+    {
+        "ranger-admin-site": {
+            "properties": {
+                "ranger.jpa.jdbc.driver": "com.mysql.jdbc.Driver",
+                "ranger.jpa.jdbc.url": "jdbc:mysql:\/\/localhost\/ranger",
+                "ranger.audit.source.type": "solr"
+            }
+        }
+    },
+    {% endif %}
+    {
+      "nifi-ambari-config": {
+        "properties": {
+          "nifi.max_mem": "4G",
+          "nifi.initial_mem": "4G",
+          "nifi.sensitive.props.key": "Hortonworks@123456",
+          "nifi.security.encrypt.configuration.password": "Hortonworks@123456"
+        }
+      }
+    },
+    {
+      "nifi-ambari-ssl-config": {
+        "properties": {
+          {% if security.value in ('kerberos', 'ranger') %}
+          "nifi.node.ssl.isenabled": "true",
+          "nifi.security.keystoreType": "JKS",
+          "nifi.security.truststoreType": "JKS",
+          "nifi.security.keystorePasswd": "Hortonworks@123456",
+          "nifi.security.keyPasswd": "Hortonworks@123456",
+          "nifi.security.truststorePasswd": "Hortonworks@123456",
+          {% endif %}
+          "nifi.toolkit.tls.token": "Hortonworks@123456",
+          "nifi.initial.admin.identity": "hrt_qa@HDF.COM"
+        }
+      }
+    },
+    {
+      "registry-common": {
+        "properties": {
+          "database_name": "registry",
+          "registry.storage.connector.user": "registry",
+          {% if cloudbreak.operating_system.startswith('sles') %}
+          "registry.storage.type": "postgresql",
+          "registry.storage.connector.connectURI": "jdbc:postgresql:\/\/%HOSTGROUP::master_2%:5432\/registry",
+          "registry.storage.db.hostname": "localhost:5432",
+          {% else %}
+          "registry.storage.type": "mysql",
+          "registry.storage.connector.connectURI": "jdbc:mysql:\/\/localhost:3306\/registry",
+          {% endif %}
+          "registry.storage.connector.password": "registry",
+          "jar.storage.type": "local",
+          "db_root_user": "root",
+          "db_root_password": "root"
+        }
+      }
+    },
+    {% if security.value in ('kerberos', 'ranger') %}
+    {
+      "kerberos-env": {
+        "properties" : {
+          "realm" : "HDF.COM",
+          "kdc_type" : "mit-kdc",
+          "kdc_hosts" : "ctr-e134-1499953498516-82150-01-000002.hwx.site",
+          "admin_server_host" : "ctr-e134-1499953498516-82150-01-000002.hwx.site"
+        }
+      }
+    },
+    {
+      "krb5-conf": {
+        "properties" : {
+          "manage_krb5_conf" : "true",
+          "domains" : "HDF.COM",
+          "content" : "[libdefaults]\nrenew_lifetime = 7d\nforwardable = true\ndefault_realm = HDF.COM\nticket_lifetime = 24h\ndns_lookup_realm = false\ndns_lookup_kdc = false\ndefault_ccache_name = /tmp/krb5cc_%{uid}\n#default_tgs_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n#default_tkt_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n[logging]\ndefault = FILE:/var/log/krb5kdc.log\nadmin_server = FILE:/var/log/kadmind.log\nkdc = FILE:/var/log/krb5kdc.log\n[realms]\nHDF.COM = {\nadmin_server = ctr-e134-1499953498516-82150-01-000002.hwx.site\nkdc = ctr-e134-1499953498516-82150-01-000002.hwx.site\n}\n"
+        }
+      }
+    },
+    {
+      "kafka-broker": {
+        "properties": {
+          "auto.create.topics.enable": "true",
+          "delete.topic.enable": "true",
+          "listeners": "SASL_PLAINTEXT:\/\/localhost:6668,PLAINTEXT:\/\/localhost:6669,SSL:\/\/localhost:6670,SASL_SSL:\/\/localhost:6671",
+          "security.inter.broker.protocol": "SASL_PLAINTEXT",
+          "ssl.truststore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.truststore.jks",
+          "ssl.truststore.password": "Hortonworks!",
+          "ssl.keystore.location": "/tmp/nifi-test-data-ycloud/hdf_kafka/ssl/server.keystore.jks",
+          "ssl.key.password": "Hortonworks!",
+          "ssl.keystore.password": "Hortonworks!"
+        }
+      }
+    },
+    {% endif %}
+    {
+      "kafka-env" : {
+        "properties" : {
+        {% raw %}
+          "content" : "\n#!/bin/bash\n\n# Set KAFKA specific environment variables here.\n\n# The java implementation to use.\nexport JAVA_HOME={{java64_home}}\nexport PATH=$PATH:$JAVA_HOME/bin\nexport PID_DIR={{kafka_pid_dir}}\nexport LOG_DIR={{kafka_log_dir}}\n{% if kerberos_security_enabled or kafka_other_sasl_enabled %}\nexport KAFKA_KERBEROS_PARAMS=\"-Djavax.security.auth.useSubjectCredsOnly=false {{kafka_kerberos_params}}\"\n{% else %}\nexport KAFKA_KERBEROS_PARAMS={{kafka_kerberos_params}}\n{% endif %}\n# Add kafka sink to classpath and related depenencies\nif [ -e \"/usr/lib/ambari-metrics-kafka-sink/ambari-metrics-kafka-sink.jar\" ]; then\n  export CLASSPATH=$CLASSPATH:/usr/lib/ambari-metrics-kafka-sink/ambari-metrics-kafka-sink.jar\n  export CLASSPATH=$CLASSPATH:/usr/lib/ambari-metrics-kafka-sink/lib/*\nfi\nif [ -f /etc/kafka/conf/kafka-ranger-env.sh ]; then\n. /etc/kafka/conf/kafka-ranger-env.sh\nfi\n\nexport KAFKA_OPTS=\"${KAFKA_OPTS} -Dorg.xerial.snappy.tempdir=/home/kafka\""
+        {% endraw %}
+        }
+      }
+    },
+    {
+      "nifi-bootstrap-env": {
+        "properties" : {
+        {% raw %}
+          "content" : "#\n# Licensed to the Apache Software Foundation (ASF) under one or more\n# contributor license agreements.  See the NOTICE file distributed with\n# this work for additional information regarding copyright ownership.\n# The ASF licenses this file to You under the Apache License, Version 2.0\n# (the \"License\"); you may not use this file except in compliance with\n# the License.  You may obtain a copy of the License at\n#\n#   http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n# Java command to use when running NiFi\njava=java\n\n# Username to use when running NiFi. This value will be ignored on Windows.\nrun.as={{nifi_user}}\n##run.as=root\n\n# Configure where NiFi's lib and conf directories live\nlib.dir={{nifi_install_dir}}/lib\nconf.dir={{nifi_config_dir}}\n\n# How long to wait after telling NiFi to shutdown before explicitly killing the Process\ngraceful.shutdown.seconds=20\n\n{% if security_enabled %}\njava.arg.0=-Djava.security.auth.login.config={{nifi_jaas_conf}}\n{% endif %}\n\n# Disable JSR 199 so that we can use JSP's without running a JDK\njava.arg.1=-Dorg.apache.jasper.compiler.disablejsr199=true\n\n# JVM memory settings\njava.arg.2=-Xms{{nifi_initial_mem}}\njava.arg.3=-Xmx{{nifi_max_mem}}\n\n# Enable Remote Debugging\n#java.arg.debug=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000\n\njava.arg.4=-Djava.net.preferIPv4Stack=true\n\n# allowRestrictedHeaders is required for Cluster/Node communications to work properly\njava.arg.5=-Dsun.net.http.allowRestrictedHeaders=true\njava.arg.6=-Djava.protocol.handler.pkgs=sun.net.www.protocol\n\n# The G1GC is still considered experimental but has proven to be very advantageous in providing great\n# performance without significant \"stop-the-world\" delays.\njava.arg.13=-XX:+UseG1GC\n\n#Set headless mode by default\njava.arg.14=-Djava.awt.headless=true\n\n#Ambari Metrics Collector URL - passed in to flow.xml for AmbariReportingTask\njava.arg.15=-Dambari.metrics.collector.url=http://{{metrics_collector_host}}:{{metrics_collector_port}}/ws/v1/timeline/metrics\n\n#Application ID - used in flow.xml - passed into flow.xml for AmbariReportingTask\njava.arg.16=-Dambari.application.id=nifi\n\n#Sets the provider of SecureRandom to /dev/urandom to prevent blocking on VMs\njava.arg.17=-Djava.security.egd=file:/dev/urandom\n\n# Requires JAAS to use only the provided JAAS configuration to authenticate a Subject, without using any \"fallback\" methods (such as prompting for username/password)\n# Please see https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/single-signon.html, section \"EXCEPTIONS TO THE MODEL\"\njava.arg.18=-Djavax.security.auth.useSubjectCredsOnly=true\n\n###\n# Notification Services for notifying interested parties when NiFi is stopped, started, dies\n###\n\n# XML File that contains the definitions of the notification services\nnotification.services.file={{nifi_config_dir}}/bootstrap-notification-services.xml\n\n# In the case that we are unable to send a notification for an event, how many times should we retry?\nnotification.max.attempts=5\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi is started?\n#nifi.start.notification.services=email-notification\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi is stopped?\n#nifi.stop.notification.services=email-notification\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi dies?\n#nifi.dead.notification.services=email-notification\n\n# to avoid BUG-96058 when snappy native lib ended up on a noexec partition\njava.arg.snappytempdir=-Dorg.xerial.snappy.tempdir=/home/nifi"
+        {% endraw %}
+        }
+      }
+    },
+    {
+      "nifi-properties": {
+        "properties": {
+          {% if security.value in ('kerberos', 'ranger') %}
+          "nifi.security.user.login.identity.provider": "kerberos-provider",
+          "nifi.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
+          "nifi.security.identity.mapping.pattern.kerb": "^(.*?)/instance@(.*?)$",
+          "nifi.security.identity.mapping.value.dn": "$1@$2",
+          "nifi.security.identity.mapping.value.kerb": "$1@$2",
+
+          {% raw %}
+          "nifi.remote.input.host": "{{nifi_node_ssl_host}}",
+          {% endraw %}
+
+          {% else %}
+
+          {% raw %}
+          "nifi.remote.input.host": "{{nifi_node_nonssl_host}}",
+          {% endraw %}
+
+          "nifi.security.user.login.identity.provider": "",
+
+          {% endif %}
+          "nifi.web.https.network.interface.default": "eth0",
+          "nifi.cluster.node.protocol.threads": "20",
+          "nifi.cluster.node.connection.timeout": "30 secs",
+          "nifi.cluster.node.read.timeout": "30 secs",
+          "nifi.cluster.flow.election.max.wait.time" : "2 mins",
+          "nifi.remote.input.socket.port" : "9889",
+          "nifi.zookeeper.connect.timeout" : "10 secs",
+          "nifi.zookeeper.session.timeout" : "10 secs"
+        }
+      }
+    },
+    {
+      "nifi-registry-properties": {
+           "properties": {
+                {% if security.value in ('kerberos', 'ranger') %}
+                "nifi.registry.security.identity.mapping.pattern.dn": "^CN=(.*?), OU=(.*?)$",
+                "nifi.registry.security.identity.mapping.value.dn": "$1@$2",
+                "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)\/instance@(.*?)$",
+                "nifi.registry.security.identity.mapping.value.kerb": "$1@$2",
+                {% endif %}
+                "nifi.registry.db.password": "Hortonworks@123456"
+           }
+       }
+    },
+    {
+      "nifi-registry-ambari-ssl-config": {
+          "properties": {
+                {% if security.value in ('kerberos', 'ranger') %}
+                "nifi.registry.ssl.isenabled": "true",
+                "nifi.registry.initial.admin.identity": "hrt_qa@HDF.COM",
+                "nifi.registry.security.keyPasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.keystorePasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.truststorePasswd": "qwertyuiop[]1234",
+                "nifi.registry.security.truststoreType": "JKS"
+                {% else %}
+                "nifi.registry.ssl.isenabled": "false"
+                {% endif %}
+          }
+       }
+    },
+    {
+       "nifi-registry-ambari-config": {
+            "properties": {
+                "nifi.registry.security.encrypt.configuration.password": "Hortonworks@123456"
+            }
+        }
+    }
+  ],
+  "host_groups": [
+    {
+      "components": [
+        {
+          "name": "AMBARI_SERVER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
+          "name": "INFRA_SOLR"
+        },
+        {
+          "name": "INFRA_SOLR_CLIENT"
+        },
+        {
+            "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_1",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "REGISTRY_SERVER"
+        },
+        {
+            "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+            "name": "KNOX_GATEWAY"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        }
+      ],
+      "configurations": [],
+      "name": "master_2",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "NIFI_MASTER"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+            "name": "ZOOKEEPER_CLIENT"
+        }
+        {% if security.value in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_TAGSYNC"
+        }
+        {% endif %}
+      ],
+      "configurations": [],
+      "name": "master_3",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "NIFI_MASTER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+        {% if security.value in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_USERSYNC"
+        }
+        {% endif %}
+      ],
+      "configurations": [],
+      "name": "master_4",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "NIFI_MASTER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+        {% if security.value in ('ranger') %}
+        ,
+        {
+            "name": "RANGER_ADMIN"
+        }
+        {% endif %}
+      ],
+      "configurations": [],
+      "name": "master_5",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_6",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_7",
+      "cardinality": "1"
+    },
+    {
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ],
+      "configurations": [],
+      "name": "master_8",
+      "cardinality": "1"
+    }
+
+    {% if security.value in ('kerberos', 'ranger') %}
+    ,
+    {
+      "components": [
+        {
+          "name": "NIFI_CA"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        }
+      ],
+      "configurations": [],
+      "name": "master_9",
+      "cardinality": "1"
+    }
+    {% endif %}
+  ],
+  "settings" : [
+    {
+      "recovery_settings" : [
+        {
+          "recovery_enabled" : "true"
+        }
+      ]
+    },
+    {
+      "service_settings" : [
+        {
+          "recovery_enabled" : "true",
+          "name" : "AMBARI_INFRA_SOLR"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KERBEROS"
+        },
+        {
+          "recovery_enabled" : "false",
+          "name" : "NIFI"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KNOX"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KAFKA"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "REGISTRY"
+        },
+        {
+          "recovery_enabled" : "false",
+          "name" : "ZOOKEEPER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "AMBARI_METRICS"
+        }
+      ]
+    },
+    {
+      "component_settings" : [
+        {
+          "recovery_enabled" : "false",
+          "name" : "ZOOKEEPER_SERVER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KERBEROS_CLIENT"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KNOX_GATEWAY"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "METRICS_MONITOR"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "KAFKA_BROKER"
+        },
+        {
+          "recovery_enabled" : "false",
+          "name" : "NIFI_MASTER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "REGISTRY_SERVER"
+        },
+        {
+          "recovery_enabled" : "true",
+          "name" : "INFRA_SOLR_CLIENT"
+        }
+      ]
+    }
+    ],
+  "Blueprints": {
+    "blueprint_name": "{{ generated.cluster_name }}",
+    "stack_name": "{{ stack }}",
+    "stack_version": "{{ stack_major_version }}"
+  }
+}
