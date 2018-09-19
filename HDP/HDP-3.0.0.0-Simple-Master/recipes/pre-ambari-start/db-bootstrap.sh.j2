@@ -1,0 +1,190 @@
+#!/bin/bash
+
+set -e
+
+PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
+
+create_mysql_community_repo() {
+    {% if cloudbreak.operating_system.startswith('centos') %}
+	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
+[mysql-connectors-community]
+name=MySQL Connectors Community
+baseurl=http://repo.mysql.com/yum/mysql-connectors-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+[mysql-tools-community]
+name=MySQL Tools Community
+baseurl=http://repo.mysql.com/yum/mysql-tools-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+[mysql56-community]
+name=MySQL 5.6 Community Server
+baseurl=http://repo.mysql.com/yum/mysql-5.6-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+MYSQLEOF
+    {% elif cloudbreak.operating_system.startswith('ubuntu') %}
+    add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
+    apt-get update
+    {% elif cloudbreak.operating_system.startswith('debian') %}
+    echo "No-Op: mysql packages are included in debian main repo."
+    {% elif cloudbreak.operating_system.startswith('sles') %}
+    wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
+    rpm -Uvh mysql80-community-release-sles12-1.noarch.rpm
+    rpm --import /etc/RPM-GPG-KEY-mysql
+    zypper modifyrepo -d mysql80-community
+    zypper modifyrepo -e mysql56-community
+    zypper refresh
+    {% endif %}
+}
+
+create_db_init_sql_file() {
+	cat > /tmp/db-script.sql <<ENDDBSQLOF
+
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysql');
+
+# TODO fix this to only grant for specific db and also does not work if Ranger is on the same host as the DB
+# Ranger may need additional setup for MariaDB
+# ranger db setup
+# CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'password';
+# GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'%' WITH GRANT OPTION;
+# GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'localhost' IDENTIFIED BY 'password';
+# FLUSH PRIVILEGES;
+
+CREATE USER 'root'@'%' IDENTIFIED BY 'mysql';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+CREATE DATABASE ranger;
+CREATE USER 'rangeradmin'@'localhost' IDENTIFIED BY 'rangeradmin';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'localhost';
+CREATE USER 'rangeradmin'@'%' IDENTIFIED BY 'rangeradmin';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+CREATE DATABASE rangerkms;
+CREATE USER 'rangerkms'@'localhost' IDENTIFIED BY 'rangerkms';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'localhost';
+CREATE USER 'rangerkms'@'%' IDENTIFIED BY 'rangerkms';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for oozie
+CREATE DATABASE ooziedb;
+CREATE USER 'oozieuser'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON ooziedb.* TO 'oozieuser'@'%' WITH GRANT OPTION;
+CREATE USER 'oozieuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON ooziedb.* TO 'oozieuser'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for hive
+CREATE DATABASE hivedb;
+CREATE USER 'hiveuser'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON hivedb.* TO 'hiveuser'@'%' WITH GRANT OPTION;
+CREATE USER 'hiveuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON hivedb.* TO 'hiveuser'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for druid
+CREATE DATABASE druid DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE USER 'druid'@'%' IDENTIFIED BY 'druid';
+GRANT ALL PRIVILEGES ON druid.* TO 'druid'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+ENDDBSQLOF
+}
+
+{% if cloudbreak.operating_system.startswith('sles') %}
+create_db_init_sql_file_psql() {
+    cat > $PSQL_SETUP_SQL_PATH <<ENDDBSQLOF
+create database registry;
+CREATE USER registry WITH PASSWORD 'registry';
+GRANT ALL PRIVILEGES ON DATABASE "registry" to registry;
+ENDDBSQLOF
+}
+{% endif %}
+
+install_mysql_server() {
+    {% if cloudbreak.operating_system.startswith('centos') %}
+    yum install -y mysql-community-release
+    yum install -y mysql-community-server
+    {% elif cloudbreak.operating_system.startswith('ubuntu') %}
+    export DEBIAN_FRONTEND="noninteractive"
+    apt-get install -y mysql-server-5.6
+    {% elif cloudbreak.operating_system.startswith('debian') %}
+    export DEBIAN_FRONTEND="noninteractive"
+    apt-get install -y software-properties-common dirmngr
+    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+    add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
+    apt install -y mariadb-server mariadb-client
+    {% elif cloudbreak.operating_system.startswith('sles') %}
+    zypper install -y mysql-community-server
+    {% endif %}
+}
+
+start_mysql_server() {
+	service {{ 'mysqld' if cloudbreak.operating_system.startswith('centos') else 'mysql' }} start
+	{% if cloudbreak.operating_system.startswith('sles') %}
+	PSQL_DATA_DIR=/var/lib/pgsql/data/
+	rm -rvf $PSQL_DATA_DIR/*
+	sudo -u postgres initdb $PSQL_DATA_DIR --auth=trust --auth-host=trust --auth-local=trust
+	echo "listen_addresses = '*'" >> /var/lib/pgsql/data/postgresql.conf
+	echo "host    all             all             0.0.0.0/0            trust" >> /var/lib/pgsql/data/pg_hba.conf
+    systemctl enable postgresql.service
+	service postgresql start
+  {% endif %}
+}
+
+init_db_bootstrap_script() {
+	mysql -u root < /tmp/db-script.sql
+}
+
+{% if cloudbreak.operating_system.startswith('sles') %}
+init_db_bootstrap_script_psql() {
+    chmod o+r $PSQL_SETUP_SQL_PATH
+    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
+}
+{% endif %}
+
+main() {
+    {% if cloudbreak.cloud_provider != 'amazon' %}
+    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
+       But it comes with a preinstalled MySQL 5.5
+    #}
+    create_mysql_community_repo
+    {% endif %}
+
+    create_db_init_sql_file
+    {% if cloudbreak.operating_system.startswith('sles') %}
+    create_db_init_sql_file_psql
+    {% endif %}
+
+
+    {% if cloudbreak.cloud_provider != 'amazon' %}
+    install_mysql_server
+    {% endif %}
+
+    start_mysql_server
+    init_db_bootstrap_script
+    {% if cloudbreak.operating_system.startswith('sles') %}
+    init_db_bootstrap_script_psql
+    {% endif %}
+
+}
+
+main
