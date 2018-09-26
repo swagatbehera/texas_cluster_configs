@@ -133,6 +133,9 @@ install_mysql_server() {
     # apt-get update is needed for seeing packages in the newly added repo
     apt-get update
     apt install -y mariadb-server mariadb-client
+    {# mariadb only accepts connections from localhost by default - turning this off: #}
+    sed -e '/bind-address/ s/^#*/#/' -i /etc/mysql/my.cnf
+    service mysql restart
     {% elif cloudbreak.operating_system.startswith('sles') %}
     zypper install -y mysql-community-server
     {% endif %}
