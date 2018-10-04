@@ -60,12 +60,14 @@ chmod 0600 /root/.ssh/config
 # making sure to get the latest Ansible
 
 {% if cloudbreak.operating_system.startswith('ubuntu') %}
-apt-get update && apt-get install software-properties-common -y && apt-add-repository ppa:ansible/ansible -y -u
+apt-get update && apt-get install software-properties-common -y && apt-add-repository ppa:ansible/ansible-2.6 -y -u
 {% endif %}
 
 
 {% if cloudbreak.operating_system.startswith('debian') %}
-   echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" >> /etc/apt/sources.list
+# explicitly install 2.6, till QE-21085 is resolved
+#   echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" >> /etc/apt/sources.list
+   echo "deb http://ppa.launchpad.net/ansible/ansible-2.6/ubuntu trusty main" >> /etc/apt/sources.list
    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
    apt-get update
 {% endif %}
@@ -79,7 +81,7 @@ apt-get install -y python-ldap zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev l
 
 {% elif cloudbreak.operating_system.startswith('centos') %}
 
-yum install -y python-ldap zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel xz xz-devel gcc make automake libffi-devel ansible
+yum install -y python-ldap zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel xz xz-devel gcc make automake libffi-devel ansible-2.6*
 {% elif cloudbreak.operating_system.startswith('sles') %}
 
 echo "solver.allowVendorChange = true" >> /etc/zypp/zypp.conf
@@ -92,7 +94,7 @@ zypper --gpg-auto-import-keys --non-interactive refresh
 
 # python-xml is needed for zypper ansible module
 zypper -n install python-xml python-ldap
-pip install ansible
+pip install ansible==2.6.1
 
 {% endif %}
 
