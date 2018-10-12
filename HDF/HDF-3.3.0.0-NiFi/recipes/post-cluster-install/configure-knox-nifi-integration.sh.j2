@@ -42,7 +42,7 @@ QQLDX7LBWSyI3V+g5fb7x4EvKoDuBhGwpYVe5jBjDYCUjMDMecMiBg==
 EOM
 
 
-[-f /root/.ssh/hw-qe-keypair.pem ] || cat > /root/.ssh/hw-qe-keypair.pem <<- EOM
+[ -f /root/.ssh/hw-qe-keypair.pem ] || cat > /root/.ssh/hw-qe-keypair.pem <<- EOM
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAwf4QUH8xfdUhMWeDIJVO3l9ukXyBLM+Wghs822hnkBuyXIeV
 yFhxNfdgP+Y0VGctnlObBTLGEt9ixKiklSZ+Tf+T+8hNkL3E1KLDO8B1kFuCayJi
@@ -87,7 +87,7 @@ chmod 0600 /root/.ssh/config
 
 
 
-[ -d /root/ansible-hdf ] || git clone -b master git@github.com:ekovacs/ansible-ambari-tools.git
+[ -d /root/ansible-ambari-tools ] || git clone -b master git@github.com:ekovacs/ansible-ambari-tools.git
 
 # Install pre-requisites
 
