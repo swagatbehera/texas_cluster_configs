@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -eux
+
+setup_sles_ntpd() {
+  zypper --non-interactive install ntp
+  systemctl enable ntpd.service
+  systemctl start ntpd.service
+}
+
+{% if operating_system.startswith('centos') %}
+yum install -y mysql-connector-java
+{% elif operating_system.startswith('ubuntu') or operating_system.startswith('debian') %}
+apt-get install -y libmysql-java
+{% elif operating_system.startswith('sles') %}
+setup_sles_ntpd
+wget https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-java-8.0.11-1.sles12.noarch.rpm
+rpm -ivh mysql-connector-java-8.0.11-1.sles12.noarch.rpm || true
+cp /usr/share/java/mysql-connector-java-8.0.11.jar /usr/share/java/mysql-connector-java.jar
+{% endif %}
+
+connector_jar=/usr/share/java/mysql-connector-java.jar
+ambari_server_path=/var/lib/ambari-server
+ambari_agent_path=/var/lib/ambari-agent
+
+[ -d  ${ambari_server_path} ] && mkdir -p ${ambari_server_path}/jdbc-drivers && cp ${connector_jar} ${ambari_server_path}/jdbc-drivers
+mkdir -p ${ambari_agent_path}/tmp/ && cp ${connector_jar} ${ambari_agent_path}/tmp/
+
+{% if operating_system.startswith('sles') %}
+# SuSE needs to be registered to have a successful install via Cloudbreak
+# XXX: Evaluation SUSE Linux Enterprise Server, x86-64, Developer Subscription, 1 yr - Valid until Apr 3 2019
+SUSE_REGISTRATION_CODE=D6F31998B06300
+SUSEConnect -r ${SUSE_REGISTRATION_CODE}
+SUSEConnect -p sle-sdk/12.3/x86_64
+
+# workaround for BUG-107330
+mkdir -p /etc/security/limits.d
+
+id nifi || useradd -mU nifi
+{% else %}
+id nifi || useradd -m nifi
+{% endif %}
+
+for i in $(seq 0 3); do
+    rm -rf /grid/${i}/*
+    mkdir -p /grid/${i}/nifi
+    chown nifi:nifi /grid/${i}/nifi
+done

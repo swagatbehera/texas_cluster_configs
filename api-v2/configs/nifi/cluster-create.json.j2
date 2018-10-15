@@ -1,0 +1,210 @@
+{
+  "general": {
+    "name": "{{ generated.cluster_name }}",
+    {% if cloud_provider == 'yarn' %}
+    "credentialName": "ycloud"
+    {% elif cloud_provider == 'openstack' %}
+    "credentialName": "openstack"
+    {% elif cloud_provider == 'azure' %}
+    "credentialName": "qaas-cloudbreak-azure"
+    {% elif cloud_provider == 'amazon' %}
+    "credentialName": "qaas-cloudbreak-aws"
+    {% endif %}
+  },
+  "tags": {
+    "userDefinedTags": {}
+  },
+  "parameters": {
+    {% if cloud_provider == 'yarn' %}
+    "yarnQueue": "{{ ycloud_queue }}",
+    "lifeTime": -1
+    {% elif cloud_provider == 'azure' %}
+    "encryptStorage": "false"
+    {% endif %}
+  },
+  {% if cloud_provider in ('azure', 'amazon') %}
+  "customDomain": {
+    "clusterNameAsSubdomain": false,
+    "hostgroupNameAsHostname": false
+  },
+  {% endif %}
+  "placement": {
+    {% if cloud_provider == 'openstack' %}
+    "availabilityZone": "nova",
+    "region": "RegionOne"
+    {% elif cloud_provider == 'azure' %}
+    "region": "North Europe"
+    {% elif cloud_provider == 'amazon' %}
+    "availabilityZone": "us-west-1a",
+    "region": "us-west-1"
+    {% else %}
+    "region": "default"
+    {% endif %}
+  },
+  "flexId": null,
+  "cluster": {
+    "ambari": {
+      "userName": "{{ ambari_username }}",
+      "password": "{{ ambari_password }}",
+      "blueprintName": "{{ generated.cluster_name }}",
+      "ambariRepoDetailsJson": {
+        "version": "{{ ambari.version }}",
+        "baseUrl": "{{ generated.ambari.repo_url }}",
+        "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+      },
+      "ambariStackDetails": {
+        "stack": "{{ stack }}",
+        "version": "{{ stack_major_version }}",
+        "verify": false,
+        "enableGplRepo": false,
+        "mpackUrl": "{{ generated.ambari.mpack_url }}",
+        "repositoryVersion": "{{ stack_version_with_build }}",
+        "versionDefinitionFileUrl": "{{ generated.ambari.stack_vdf_url }}"
+      },
+      "gateway": {
+        "enableGateway": false,
+        "gatewayType": "INDIVIDUAL"
+      },
+      "validateBlueprint": false,
+      {% if security.value in ('kerberos', 'ranger') %}
+      "ambariSecurityMasterKey": "",
+      "kerberos": {
+        "url": "ctr-e134-1499953498516-82150-01-000002.hwx.site",
+        "adminUrl": "ctr-e134-1499953498516-82150-01-000002.hwx.site",
+        "realm": "HDF.COM",
+        "tcpAllowed": true,
+        "password": "Hortonworks",
+        "principal": "admin/admin"
+      },
+      "enableSecurity": true
+      {% else %}
+      "ambariSecurityMasterKey": ""
+      {% endif %}
+    }
+  },
+  "imageSettings": {
+    "imageId": "{{ image.uuid }}",
+    "imageCatalog": "{{ image.catalog }}"
+  },
+  "instanceGroups": [
+   {% set instance_flavors = {
+    'openstack': {'small':{"instanceType":"m1.medium","volumeType":"HDD","volumeCount":0,"volumeSize": 100}, 'big': {"instanceType": "cloudbreak", "volumeType": "HDD","volumeCount": 0,"volumeSize": 100}},
+    'amazon': {'small': {"instanceType": "m1.small", "volumeType": "standard", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "m4.xlarge","volumeType": "standard", "volumeCount": 1,"volumeSize": 100}},
+    'azure': {'small': {"instanceType": "Standard_D1_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}, 'big': {"instanceType": "Standard_D3_v2", "volumeType": "Standard_LRS", "volumeCount": 1, "volumeSize": 100}}
+    } %}
+{% macro node_spec(instance_flavors, node) %}
+    {
+      "template": {
+        {% if cloud_provider == 'yarn' %}
+        {% if node in range(1, 6)%}
+        "customInstanceType": {
+          "cpus": 4,
+          "memory": 8192
+        }
+        {% else %}
+        "customInstanceType": {
+          "cpus": 1,
+          "memory": 1024
+        }
+        {% endif %}
+        {% else %}
+        "parameters": {
+          {% for key, value in kwargs.items() %}
+            "{{ key }}": "{{ value }}",
+          {% endfor %}
+          "encrypted": false
+        },
+        "instanceType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['instanceType'] }}",
+        "volumeType": "{{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeType'] }}",
+        "volumeCount": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeCount'] }},
+        "volumeSize": {{ instance_flavors[cloud_provider]['big' if node in range(1, 6) else 'small']['volumeSize'] }}
+        {% endif %}
+      },
+      "nodeCount": 1,
+      "group": "master_{{ node }}",
+      "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
+      "recoveryMode": "MANUAL",
+      "securityGroup": {
+        {% if cloud_provider == 'openstack' %}
+        "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
+        {% elif cloud_provider in ('azure', 'amazon') %}
+        "securityRules": [
+          {% if node == 1 %}
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "443",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "9443",
+            "protocol": "tcp"
+          },
+          {% endif %}
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": "22",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.2/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "192.175.27.10/32",
+            "ports": "1-65000",
+            "protocol": "tcp"
+          }
+        ]
+        {% endif %}
+      },
+      "recipeNames": [
+        {% if node == 1 %}
+        "{{ generated.cluster_name }}-install-openldap-sh-pre-ambari-start",
+        {% endif %}
+        {% if node == 2 or node == 5 %}
+        "{{ generated.cluster_name }}-db-bootstrap-sh-pre-ambari-start",
+        {% endif %}
+        "{{ generated.cluster_name }}-setup-kafka-certs-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination",
+        "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-supervisord-sh-pre-ambari-start"
+      ]
+    }
+    {% endmacro %}
+    {% set all_nodes = range(1, 10) if security.value in ('kerberos', 'ranger') else range(1, 9) %}
+    {% set last_item = all_nodes|length %}
+    {% for node in all_nodes %}
+        {% if 'azure' in cloud_provider %}
+{{ node_spec(instance_flavors, node, managedDisk=True) }} {{ ',' if node != last_item else '' }}
+        {% else %}
+{{ node_spec(instance_flavors, node) }} {{ ',' if node != last_item else '' }}
+        {% endif %}
+    {% endfor %}
+  ],
+  "network": {
+    {% if cloud_provider == 'openstack' %}
+    "parameters": {
+      {# See Openstack > Network > Networks #}
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkingOption": "provider",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    }
+    {% elif cloud_provider == 'azure' %}
+    "subnetCIDR": "10.0.0.0/16",
+    "parameters": {
+      "noFirewallRules": false,
+      "noPublicIp": false
+    }
+    {% elif cloud_provider == 'amazon' %}
+    "subnetCIDR": "10.0.0.0/16",
+    "parameters": {}
+    {% endif %}
+  },
+  "stackAuthentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB/hBQfzF91SExZ4MglU7eX26RfIEsz5aCGzzbaGeQG7Jch5XIWHE192A/5jRUZy2eU5sFMsYS32LEqKSVJn5N/5P7yE2QvcTUosM7wHWQW4JrImL0PTJTPXRc/QvkGPka3LvBCL6PlVENyGGo+C3D+dgSloaBeZ9URk0I+Yc/VsihQoMdkVOYIKAGxZlG/JBEBBjCZ5ng4WlzdfcsKgtUGbr6nOn3mqK8/Pkv8CeWguEYaibj5Os6ydmHVZ30w0tLD6Gu7UH14M3M3LnNlCndSLG4bRzUP6OxGEFWlG8GPJnv3Z3h3obqK3jIAsx8GHR9ExR8YdNlvkigbQg8xDGJ hw-qe@hortonworks.com",
+    "publicKeyId": null
+  }
+}

@@ -1,0 +1,190 @@
+#!/bin/bash
+
+set -e
+
+create_mysql_community_repo() {
+    {% if operating_system.startswith('centos') %}
+	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
+[mysql-connectors-community]
+name=MySQL Connectors Community
+baseurl=http://repo.mysql.com/yum/mysql-connectors-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+[mysql-tools-community]
+name=MySQL Tools Community
+baseurl=http://repo.mysql.com/yum/mysql-tools-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+[mysql56-community]
+name=MySQL 5.6 Community Server
+baseurl=http://repo.mysql.com/yum/mysql-5.6-community/el/7/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://repo.mysql.com/RPM-GPG-KEY-mysql
+
+MYSQLEOF
+    {% elif operating_system.startswith('ubuntu') %}
+    add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
+    apt-get update
+    {% elif operating_system.startswith('debian') %}
+    echo "No-Op: mysql packages are included in debian main repo."
+    {% elif operating_system.startswith('sles') %}
+    wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
+    rpm -Uvh --replacepkgs mysql80-community-release-sles12-1.noarch.rpm
+    rpm --import /etc/RPM-GPG-KEY-mysql
+    zypper modifyrepo -d mysql80-community
+    zypper modifyrepo -e mysql56-community
+    zypper refresh
+    {% endif %}
+}
+
+create_db_init_sql_file() {
+	cat > /tmp/db-script.sql <<ENDDBSQLOF
+
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+
+# TODO fix this to only grant for specific db and also does not work if Ranger is on the same host as the DB
+# ranger db setup
+# CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'password';
+# GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'%' WITH GRANT OPTION;
+# GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'localhost' IDENTIFIED BY 'password';
+# FLUSH PRIVILEGES;
+
+CREATE USER 'rangerdba'@'localhost' IDENTIFIED BY 'rangerdba';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost';
+CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'rangerdba';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for oozie
+CREATE DATABASE oozie;
+CREATE USER 'oozie'@'%' IDENTIFIED BY 'oozie';
+GRANT ALL PRIVILEGES ON oozie.* TO 'oozie'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for hive
+CREATE DATABASE hive;
+CREATE USER 'hive'@'%' IDENTIFIED BY 'hive';
+GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for druid
+CREATE DATABASE druid DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE USER 'druid'@'%' IDENTIFIED BY 'druid';
+GRANT ALL PRIVILEGES ON druid.* TO 'druid'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+# create database for streamline
+CREATE DATABASE streamline;
+CREATE USER 'streamline'@'%' IDENTIFIED BY 'streamline';
+CREATE USER 'streamline'@'localhost' IDENTIFIED BY 'streamline';
+GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'localhost' IDENTIFIED BY 'streamline' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+#create database for registry
+CREATE DATABASE registry;
+CREATE USER 'registry'@'%' IDENTIFIED BY 'registry';
+CREATE USER 'registry'@'localhost' IDENTIFIED BY 'registry';
+GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'localhost' IDENTIFIED BY 'registry' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+ENDDBSQLOF
+}
+
+{% if operating_system.startswith('sles') %}
+PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
+
+create_db_init_sql_file_psql() {
+    cat > $PSQL_SETUP_SQL_PATH <<ENDDBSQLOF
+create database registry;
+CREATE USER registry WITH PASSWORD 'registry';
+GRANT ALL PRIVILEGES ON DATABASE "registry" to registry;
+
+create database streamline;
+CREATE USER streamline WITH PASSWORD 'streamline';
+GRANT ALL PRIVILEGES ON DATABASE "streamline" to streamline;
+
+ENDDBSQLOF
+}
+
+init_db_bootstrap_script_psql() {
+    chmod o+r $PSQL_SETUP_SQL_PATH
+    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
+}
+{% endif %}
+
+install_mysql_server() {
+    {% if operating_system.startswith('centos') %}
+    yum install -y mysql-community-release
+    yum install -y mysql-community-server
+    {% elif operating_system.startswith('ubuntu') %}
+    export DEBIAN_FRONTEND="noninteractive"
+    apt-get install -y mysql-server-5.6
+    {% elif operating_system.startswith('debian') %}
+    export DEBIAN_FRONTEND="noninteractive"
+    apt-get install -y software-properties-common dirmngr
+    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+    add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
+    apt-get update
+    apt-get install -y mariadb-server mariadb-client
+    {# mariadb only accepts connections from localhost by default - turning this off: #}
+    sed -e '/bind-address/ s/^#*/#/' -i /etc/mysql/my.cnf
+    service mysql restart
+    {% elif operating_system.startswith('sles') %}
+    zypper install -y mysql-community-server
+    zypper install -y postgresql postgresql-server postgresql-contrib
+    {% endif %}
+}
+
+start_mysql_server() {
+	service {{ 'mysqld' if operating_system.startswith('centos') else 'mysql' }} start
+	{% if operating_system.startswith('sles') %}
+	PSQL_DATA_DIR=/var/lib/pgsql/data/
+	rm -rvf $PSQL_DATA_DIR/*
+	sudo -u postgres initdb $PSQL_DATA_DIR --auth=trust --auth-host=trust --auth-local=trust
+	echo "listen_addresses = '*'" >> /var/lib/pgsql/data/postgresql.conf
+	echo "host    all             all             0.0.0.0/0            trust" >> /var/lib/pgsql/data/pg_hba.conf
+    systemctl enable postgresql.service
+	service postgresql start
+
+	{% endif %}
+}
+
+init_db_bootstrap_script() {
+	mysql -u root < /tmp/db-script.sql
+}
+
+main() {
+    {% if cloud_provider != 'amazon' %}
+    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
+       But it comes with a preinstalled MySQL 5.5
+    #}
+    create_mysql_community_repo
+    {% endif %}
+
+    create_db_init_sql_file
+    {% if operating_system.startswith('sles') %}
+    create_db_init_sql_file_psql
+    {% endif %}
+
+    {% if cloud_provider != 'amazon' %}
+    install_mysql_server
+    {% endif %}
+
+    start_mysql_server
+    init_db_bootstrap_script
+    {% if operating_system.startswith('sles') %}
+    init_db_bootstrap_script_psql
+    {% endif %}
+}
+
+main
