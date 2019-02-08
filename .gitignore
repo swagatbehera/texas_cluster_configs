@@ -2,7 +2,11 @@
 .idea/
 *.iml
 *.DS_Store
+
+# Rendered templates
 blueprint.json
 cluster-create.json
+cluster-definition.json
+cluster-template.json
 ambariUrl.txt
 *.sh
