@@ -1,0 +1,82 @@
+{
+  "yarn-site": {
+    "properties": {
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "yarn.authorization-provider": "org.apache.ranger.authorization.yarn.authorizer.RangerYarnAuthorizer",
+      {% endif %}
+      "yarn.http.policy": "HTTP_ONLY",
+      "yarn.log-aggregation-status.time-out.ms": "180000",
+      "yarn.nodemanager.address": "0.0.0.0:25454",
+      "yarn.nodemanager.delete.debug-delay-sec": "3600",
+      "yarn.nodemanager.local-dirs": "/grid/0/hadoop/yarn/local",
+      "yarn.nodemanager.log-dirs": "/grid/0/hadoop/yarn/log",
+      "yarn.nodemanager.recovery.enabled": "true",
+      "yarn.resourcemanager.address": "%HOSTGROUP::host_group_master%:8050",
+      "yarn.resourcemanager.admin.address": "%HOSTGROUP::host_group_master%:8141",
+      "yarn.resourcemanager.am.max-attempts": "20",
+      "yarn.resourcemanager.bind-host": "0.0.0.0",
+      "yarn.resourcemanager.cluster-id": "yarn-cluster",
+      "yarn.resourcemanager.ha.automatic-failover.zk-base-path": "/yarn-leader-election",
+      "yarn.resourcemanager.ha.enabled": "true",
+      "yarn.resourcemanager.ha.rm-ids": "rm1,rm2",
+      "yarn.resourcemanager.hostname": "%HOSTGROUP::host_group_master%",
+      "yarn.resourcemanager.hostname.rm1": "%HOSTGROUP::host_group_master%",
+      "yarn.resourcemanager.hostname.rm2": "%HOSTGROUP::host_group_ha_master%",
+      "yarn.resourcemanager.recovery.enabled": "true",
+      "yarn.resourcemanager.resource-tracker.address": "%HOSTGROUP::host_group_master%:8025",
+      "yarn.resourcemanager.resource-tracker.address.rm1": "%HOSTGROUP::host_group_master%:8025",
+      "yarn.resourcemanager.resource-tracker.address.rm2": "%HOSTGROUP::host_group_ha_master%:8025",
+      "yarn.resourcemanager.scheduler.address": "%HOSTGROUP::host_group_master%:8030",
+      "yarn.resourcemanager.scheduler.class": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler",
+      "yarn.resourcemanager.store.class": "org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore",
+      "yarn.resourcemanager.webapp.address": "%HOSTGROUP::host_group_master%:8088",
+      "yarn.resourcemanager.webapp.address.rm1": "%HOSTGROUP::host_group_master%:8088",
+      "yarn.resourcemanager.webapp.address.rm2": "%HOSTGROUP::host_group_ha_master%:8088",
+      "yarn.resourcemanager.webapp.https.address": "%HOSTGROUP::host_group_master%:8088",
+      "yarn.resourcemanager.work-preserving-recovery.enabled": "true",
+      "yarn.resourcemanager.zk-address": "%HOSTGROUP::host_group_slave%:2181",
+      "yarn.timeline-service.bind-host": "0.0.0.0",
+      "yarn.timeline-service.client.max-retries": "30",
+      "yarn.timeline-service.enabled": "true",
+      "yarn.timeline-service.leveldb-state-store.path": "/grid/0/hadoop/yarn/timeline",
+      "yarn.timeline-service.leveldb-timeline-store.path": "/grid/0/hadoop/yarn/timeline",
+      "yarn.timeline-service.leveldb-timeline-store.read-cache-size": "104857600",
+      "yarn.timeline-service.leveldb-timeline-store.start-time-read-cache-size": "10000"
+    }
+  }
+},
+{
+  "yarn-env": {
+    "properties": {
+      "yarn_log_dir_prefix": "/grid/0/log/yarn",
+      "yarn_user": "yarn"
+    }
+  }
+},
+
+{
+  "yarn-hbase-env": {
+    "properties": {
+      "yarn_hbase_log_level": "DEBUG"
+    }
+  }
+},
+{
+  "yarn-hbase-site": {
+    "properties": {
+      "hbase.master.hfilecleaner.ttl": "604800000",
+      "hbase.master.logcleaner.ttl": "604800000",
+      "hbase.master.namespace.init.timeout": "86400000"
+    }
+  }
+},
+{
+  "capacity-scheduler": {
+    "properties": {
+      "yarn.scheduler.capacity.maximum-am-resource-percent": "0.4",
+      "yarn.scheduler.capacity.root.acl_submit_applications": "hive,zeppelin,hbase,ambari-qa users",
+      "yarn.scheduler.capacity.root.default.acl_administer_jobs": "hive,zeppelin,hbase,ambari-qa users",
+      "yarn.scheduler.capacity.root.default.acl_submit_applications": "hive,zeppelin,hbase,ambari-qa users"
+    }
+  }
+}

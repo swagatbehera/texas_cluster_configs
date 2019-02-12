@@ -1,0 +1,19 @@
+{
+  "kafka-broker": {
+    "properties": {
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "authorizer.class.name": "org.apache.ranger.authorization.kafka.authorizer.RangerKafkaAuthorizer",
+      {% endif %}
+      "log.dirs": "/grid/0/kafka-logs",
+      "zookeeper.connection.timeout.ms": "360000"
+    }
+  }
+},
+{
+  "kafka-env": {
+    "properties": {
+      "kafka_log_dir": "/grid/0/log/kafka",
+      "kafka_user": "kafka"
+    }
+  }
+}

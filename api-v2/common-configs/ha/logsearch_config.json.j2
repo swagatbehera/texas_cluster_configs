@@ -1,0 +1,38 @@
+{
+  "logfeeder-env": {
+    "properties": {
+      "logfeeder_log_dir": "/grid/0/log/ambari-logsearch-logfeeder"
+    }
+  }
+},
+  {
+    "logsearch-properties": {
+      "properties": {
+        "logsearch.logfeeder.include.default.level": "FATAL,ERROR,WARN,INFO,DEBUG,TRACE,UNKNOWN"
+      }
+    }
+  },
+  {
+    "logfeeder-properties": {
+      "properties": {
+        "logfeeder.include.default.level": "FATAL,ERROR,WARN,INFO,DEBUG,TRACE,UNKNOWN"
+      },
+      "properties_attributes": {}
+    }
+  },
+  {
+    "logsearch-admin-json": {
+      "properties": {
+        "logsearch_admin_password": "admin",
+        "logsearch_admin_username": "ambari_logsearch_admin"
+      }
+    }
+  },
+  {
+    "logsearch-env": {
+      "properties": {
+        "logsearch_log_dir": "/grid/0/log/ambari-logsearch-portal",
+        "logsearch_user": "logsearch"
+      }
+    }
+  }

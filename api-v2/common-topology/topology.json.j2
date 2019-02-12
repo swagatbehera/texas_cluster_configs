@@ -1,0 +1,39 @@
+{% set services = ['hdfs', 'nfs','yarn', 'mr', 'zookeeper', 'pig','sqoop','ams','ranger','kms','hbase','phoenix', 'atlas', 'kafka', 'hive','spark','livy','zeppelin', 'kerberos', 'oozie', 'storm','smartsense','logsearch','infra_solr','tez'] %}
+
+"host_groups": [{
+                  "cardinality": "1",
+                  "components": [
+                  {% for service in services %}
+                  {% include ["common-topology/master/"+ service + ".json.j2"] ignore missing %}
+                  {% endfor %}
+                  ],
+                  "name": "host_group_master"
+                },
+                {
+                  "cardinality": "1",
+                  "components": [
+                  {% for service in services %}
+                  {% include ["common-topology/gateway/"+ service + ".json.j2"] ignore missing %}
+                  {% endfor %}
+                  ],
+                  "name": "host_group_gateway"
+                },
+                {
+                  "cardinality": "1",
+                  "components": [
+                  {% for service in services %}
+                  {% include ["common-topology/ha_master/"+ service + ".json.j2"] ignore missing %}
+                  {% endfor %}
+                  ],
+                  "name": "host_group_ha_master"
+                },
+                {
+                  "cardinality": "1",
+                  "components": [
+                  {% for service in services %}
+                  {% include ["common-topology/slave/"+ service + ".json.j2"] ignore missing %}
+                  {% endfor %}
+                  ],
+                  "name": "host_group_slave"
+                }
+]

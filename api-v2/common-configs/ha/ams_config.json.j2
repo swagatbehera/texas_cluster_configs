@@ -1,0 +1,38 @@
+{
+  "ams-hbase-site": {
+    "properties": {
+      "hbase.rootdir": "file:///grid/0/lib/ambari-metrics-collector/hbase",
+      "hbase.tmp.dir": "/grid/0/lib/ambari-metrics-collector/hbase-tmp"
+    }
+  }
+},
+  {
+    "ams-site": {
+      "properties": {
+        "timeline.metrics.service.rpc.address": "0.0.0.0:20200"
+      }
+    }
+  },
+  {
+    "ams-hbase-env": {
+      "properties": {
+        "hbase_log_dir": "/grid/0/log/metric_collector"
+      }
+    }
+  },
+  {
+    "ams-env": {
+      "properties": {
+        "ambari_metrics_user": "ams",
+        "metrics_collector_log_dir": "/grid/0/log/metric_collector",
+        "metrics_monitor_log_dir": "/grid/0/log/metric_monitor"
+      }
+    }
+  },
+  {
+    "ams-grafana-env": {
+      "properties": {
+        "metrics_grafana_password": "admin"
+      }
+    }
+  }

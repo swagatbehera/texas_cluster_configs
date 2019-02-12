@@ -1,0 +1,44 @@
+{
+  "oozie-env": {
+    "properties": {
+      {% if operating_system.startswith('centos') %}
+      "oozie_database": "Existing MySQL / MariaDB Database",
+      "oozie_database_type": "mysql",
+      "oozie_existing_mysql_database": "MySQL",
+      {% endif %}
+      "oozie_existing_mysql_host": "ambari-server.hwx.site",
+      "oozie_log_dir": "/grid/0/log/oozie",
+      "oozie_metastore_user_passwd": "password",
+      "oozie_user": "oozie"
+    }
+  }
+},
+{
+  "oozie-site": {
+    "properties": {
+      "oozie.base.url": "http://%HOSTGROUP::host_group_master%:11000/oozie",
+      "oozie.db.schema.name": "ooziedb",
+      "oozie.email.from.address": "qe-group@hortonworks.com",
+      "oozie.email.smtp.auth": "false",
+      "oozie.email.smtp.host": "localhost",
+      "oozie.email.smtp.password": "",
+      "oozie.email.smtp.port": "25",
+      "oozie.email.smtp.username": "",
+      {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+      "oozie.ha.authentication.kerberos.keytab": "/etc/security/keytabs/spnego.service.keytab",
+      "oozie.ha.authentication.kerberos.principal": "*",
+      "oozie.authentication.kerberos.principal": "HTTP/_HOST@HDP.COM",
+      {% endif %}
+      "oozie.service.JPAService.create.db.schema": "false",
+      {% if operating_system.startswith('centos') %}
+      "oozie.service.JPAService.jdbc.driver": "com.mysql.jdbc.Driver",
+      "oozie.service.JPAService.jdbc.url": "jdbc:mysql://ambari-server.hwx.site/ooziedb",
+      {% endif %}
+      "oozie.service.JPAService.jdbc.password": "password",
+      "oozie.service.JPAService.jdbc.username": "oozieuser",
+      "oozie.service.coord.check.maximum.frequency": "false",
+      "oozie.services.ext": "org.apache.oozie.service.JMSAccessorService,org.apache.oozie.service.PartitionDependencyManagerService,org.apache.oozie.service.HCatAccessorService,org.apache.oozie.service.ZKLocksService,org.apache.oozie.service.ZKXLogStreamingService,org.apache.oozie.service.ZKJobsConcurrencyService,org.apache.oozie.service.ZKUUIDService",
+      "oozie.zookeeper.connection.string": "%HOSTGROUP::host_group_slave%:2181"
+    }
+  }
+}

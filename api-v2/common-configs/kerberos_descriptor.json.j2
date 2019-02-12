@@ -1,0 +1,37 @@
+{% set kerberos_users = ['hdfs','yarn', 'hive', 'storm', 'atlas','spark','zeppelin','mapred', 'hbase', 'kafka'] %}
+"security": {
+  "kerberos_descriptor": {
+    "services": [
+    {% for kerb_user in kerberos_users %}
+    {
+      "components": [],
+      "name": "{{ kerb_user | upper }}",
+      "identities": [
+      {
+        "name": "{{ kerb_user }}user",
+        "principal": {
+          "value": "{{ kerb_user }}${principal_suffix}@${realm}",
+          "type": "user",
+          "local_username": "{{ kerb_user }}"
+        },
+        "keytab": {
+          "file": "${keytab_dir}/{{ kerb_user }}.headless.keytab",
+          "group": {
+            "access": "",
+            "name": "${cluster-env/user_group}"
+          },
+          "owner": {
+            "access": "r",
+            "name": "{{ kerb_user }}"
+          }
+        }
+      }
+      ]
+    }
+    {%- if not loop.last -%}
+      ,
+    {% endif %}
+    {% endfor %}
+    ]
+  }
+}

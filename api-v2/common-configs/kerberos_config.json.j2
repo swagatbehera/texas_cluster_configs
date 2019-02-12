@@ -1,0 +1,20 @@
+{
+  "kerberos-env": {
+    "properties": {
+      "admin_server_host": "ctr-e139-1542663976389-27189-01-000002.hwx.site",
+      "encryption_types": "aes des3-cbc-sha1 rc4 des-cbc-md5",
+      "kdc_hosts": "ctr-e139-1542663976389-27189-01-000002.hwx.site",
+      "kdc_type": "mit-kdc",
+      "realm": "HDP.COM"
+    }
+  }
+},
+{
+  "krb5-conf": {
+    "properties": {
+      "domains": "HDP.COM",
+      "manage_krb5_conf": "true",
+      "content": "[libdefaults]\nrenew_lifetime = 7d\nforwardable = true\ndefault_realm = HDP.COM\nticket_lifetime = 24h\ndns_lookup_realm = false\ndns_lookup_kdc = false\ndefault_ccache_name = /tmp/krb5cc_%{uid}\n#default_tgs_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n#default_tkt_enctypes = aes des3-cbc-sha1 rc4 des-cbc-md5\n[logging]\ndefault = FILE:/var/log/krb5kdc.log\nadmin_server = FILE:/var/log/kadmind.log\nkdc = FILE:/var/log/krb5kdc.log\n[realms]\nHDP.COM = {\nadmin_server = ctr-e139-1542663976389-27189-01-000002.hwx.site\nkdc = ctr-e139-1542663976389-27189-01-000002.hwx.site\n}\n"
+    }
+  }
+}

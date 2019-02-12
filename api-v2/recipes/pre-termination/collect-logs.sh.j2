@@ -2,6 +2,11 @@
 
 set -e
 
+# Install prerequisites for compiling and installing python on sles
+{% if operating_system.startswith('sles') %}
+zypper -n install gcc make zlib-devel openssl openssl-devel
+{% endif %}
+
 # Setup pyenv for running log collector
 
 [ -d /root/.pyenv ] || git clone https://github.com/pyenv/pyenv.git /root/.pyenv
@@ -20,6 +25,9 @@ pyenv install 3.6.4
 pyenv local 3.6.4
 
 pip install paramiko==2.4.1
+
+# Directory for awscli used for log copy to S3 server
+mkdir ~/.aws
 
 cd /root/infra-v2
 

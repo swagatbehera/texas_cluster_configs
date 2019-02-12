@@ -1,0 +1,21 @@
+{
+	"application-properties": {
+		"properties": {
+			{% if security.value in ('ranger', 'ranger+tde') %}
+			"atlas.authorizer.impl": "ranger",
+			{% endif %}
+			"atlas.graph.storage.hostname": "%HOSTGROUP::host_group_slave%:2181",
+			"atlas.rest.address": "http://%HOSTGROUP::host_group_master%:21000"
+		}
+	}
+},
+{
+	"atlas-env": {
+		"properties": {
+			"atlas.admin.password": "admin123",
+			"atlas.admin.username": "admin",
+			"metadata_log_dir": "/grid/0/log/atlas",
+			"metadata_user": "atlas"
+		}
+	}
+}

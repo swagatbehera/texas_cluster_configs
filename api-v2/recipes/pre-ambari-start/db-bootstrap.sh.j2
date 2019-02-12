@@ -2,6 +2,8 @@
 
 set -e
 
+PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
+
 create_mysql_community_repo() {
     {% if operating_system.startswith('centos') %}
 	cat > /etc/yum.repos.d/mysql-community.repo << MYSQLEOF
@@ -34,7 +36,7 @@ MYSQLEOF
     echo "No-Op: mysql packages are included in debian main repo."
     {% elif operating_system.startswith('sles') %}
     wget https://repo.mysql.com//mysql80-community-release-sles12-1.noarch.rpm
-    rpm -Uvh --replacepkgs mysql80-community-release-sles12-1.noarch.rpm
+    rpm -Uvh mysql80-community-release-sles12-1.noarch.rpm
     rpm --import /etc/RPM-GPG-KEY-mysql
     zypper modifyrepo -d mysql80-community
     zypper modifyrepo -e mysql56-community
@@ -45,33 +47,56 @@ MYSQLEOF
 create_db_init_sql_file() {
 	cat > /tmp/db-script.sql <<ENDDBSQLOF
 
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysql');
 
 # TODO fix this to only grant for specific db and also does not work if Ranger is on the same host as the DB
+# Ranger may need additional setup for MariaDB
 # ranger db setup
 # CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'password';
 # GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'%' WITH GRANT OPTION;
 # GRANT ALL PRIVILEGES ON *.* to 'rangerdba'@'localhost' IDENTIFIED BY 'password';
 # FLUSH PRIVILEGES;
 
-CREATE USER 'rangerdba'@'localhost' IDENTIFIED BY 'rangerdba';
-GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost';
-CREATE USER 'rangerdba'@'%' IDENTIFIED BY 'rangerdba';
-GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%';
-GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'localhost' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'rangerdba'@'%' WITH GRANT OPTION;
+CREATE USER 'root'@'%' IDENTIFIED BY 'mysql';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+CREATE DATABASE ranger;
+CREATE USER 'rangeradmin'@'localhost' IDENTIFIED BY 'rangeradmin';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'localhost';
+CREATE USER 'rangeradmin'@'%' IDENTIFIED BY 'rangeradmin';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangeradmin'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+CREATE DATABASE rangerkms;
+CREATE USER 'rangerkms'@'localhost' IDENTIFIED BY 'rangerkms';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'localhost';
+CREATE USER 'rangerkms'@'%' IDENTIFIED BY 'rangerkms';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'rangerkms'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 # create database for oozie
-CREATE DATABASE oozie;
-CREATE USER 'oozie'@'%' IDENTIFIED BY 'oozie';
-GRANT ALL PRIVILEGES ON oozie.* TO 'oozie'@'%' WITH GRANT OPTION;
+CREATE DATABASE ooziedb;
+CREATE USER 'oozieuser'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON ooziedb.* TO 'oozieuser'@'%' WITH GRANT OPTION;
+CREATE USER 'oozieuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON ooziedb.* TO 'oozieuser'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 # create database for hive
-CREATE DATABASE hive;
-CREATE USER 'hive'@'%' IDENTIFIED BY 'hive';
-GRANT ALL PRIVILEGES ON hive.* TO 'hive'@'%' WITH GRANT OPTION;
+CREATE DATABASE hivedb;
+CREATE USER 'hiveuser'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON hivedb.* TO 'hiveuser'@'%' WITH GRANT OPTION;
+CREATE USER 'hiveuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON hivedb.* TO 'hiveuser'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 # create database for druid
@@ -80,45 +105,22 @@ CREATE USER 'druid'@'%' IDENTIFIED BY 'druid';
 GRANT ALL PRIVILEGES ON druid.* TO 'druid'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
-# create database for streamline
-CREATE DATABASE streamline;
-CREATE USER 'streamline'@'%' IDENTIFIED BY 'streamline';
-CREATE USER 'streamline'@'localhost' IDENTIFIED BY 'streamline';
-GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON streamline.* TO 'streamline'@'localhost' IDENTIFIED BY 'streamline' WITH GRANT OPTION;
+# create database for superset
+CREATE DATABASE superset DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE USER 'superset'@'%' IDENTIFIED BY 'superset';
+GRANT ALL PRIVILEGES ON superset.* TO 'superset'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-
-#create database for registry
-CREATE DATABASE registry;
-CREATE USER 'registry'@'%' IDENTIFIED BY 'registry';
-CREATE USER 'registry'@'localhost' IDENTIFIED BY 'registry';
-GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON registry.* TO 'registry'@'localhost' IDENTIFIED BY 'registry' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-
 
 ENDDBSQLOF
 }
 
 {% if operating_system.startswith('sles') %}
-PSQL_SETUP_SQL_PATH=/tmp/postgresql-setup.sql
-
 create_db_init_sql_file_psql() {
     cat > $PSQL_SETUP_SQL_PATH <<ENDDBSQLOF
 create database registry;
 CREATE USER registry WITH PASSWORD 'registry';
 GRANT ALL PRIVILEGES ON DATABASE "registry" to registry;
-
-create database streamline;
-CREATE USER streamline WITH PASSWORD 'streamline';
-GRANT ALL PRIVILEGES ON DATABASE "streamline" to streamline;
-
 ENDDBSQLOF
-}
-
-init_db_bootstrap_script_psql() {
-    chmod o+r $PSQL_SETUP_SQL_PATH
-    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
 }
 {% endif %}
 
@@ -126,22 +128,27 @@ install_mysql_server() {
     {% if operating_system.startswith('centos') %}
     yum install -y mysql-community-release
     yum install -y mysql-community-server
+    rm -rf /usr/share/java/mysql-connector-java*.jar
+    mkdir -p /tmp/mysql-connector-java
+    wget http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.33.tar.gz -O /tmp/mysql-connector-java.tar.gz >/dev/null 2>&1
+    tar -zxvf /tmp/mysql-connector-java.tar.gz -C /tmp/mysql-connector-java >/dev/null
+    mkdir -p /usr/share/java
+    cp /tmp/mysql-connector-java/mysql-connector-java-*/mysql-connector-java-*-bin.jar /usr/share/java/mysql-jdbc-qe.jar
+    chmod -R 777 /usr/share/java
+    rm -f /usr/share/java/mysql-connector-java.jar
+    ln -s /usr/share/java/mysql-jdbc-qe.jar /usr/share/java/mysql-connector-java.jar
+    ambari-server setup --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar
     {% elif operating_system.startswith('ubuntu') %}
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y mysql-server-5.6
     {% elif operating_system.startswith('debian') %}
     export DEBIAN_FRONTEND="noninteractive"
     apt-get install -y software-properties-common dirmngr
-    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
+    apt-key adv --no-tty --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8
     add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.2/debian stretch main'
-    apt-get update
-    apt-get install -y mariadb-server mariadb-client
-    {# mariadb only accepts connections from localhost by default - turning this off: #}
-    sed -e '/bind-address/ s/^#*/#/' -i /etc/mysql/my.cnf
-    service mysql restart
+    apt install -y mariadb-server mariadb-client
     {% elif operating_system.startswith('sles') %}
     zypper install -y mysql-community-server
-    zypper install -y postgresql postgresql-server postgresql-contrib
     {% endif %}
 }
 
@@ -155,19 +162,22 @@ start_mysql_server() {
 	echo "host    all             all             0.0.0.0/0            trust" >> /var/lib/pgsql/data/pg_hba.conf
     systemctl enable postgresql.service
 	service postgresql start
-
-	{% endif %}
+  {% endif %}
 }
 
 init_db_bootstrap_script() {
 	mysql -u root < /tmp/db-script.sql
 }
 
+{% if operating_system.startswith('sles') %}
+init_db_bootstrap_script_psql() {
+    chmod o+r $PSQL_SETUP_SQL_PATH
+    sudo -u postgres psql -f $PSQL_SETUP_SQL_PATH
+}
+{% endif %}
+
 main() {
-    {% if cloud_provider != 'amazon' %}
-    {# Amazon Linux doesn't support MySQL 5.6 (as there is no systemd)
-       But it comes with a preinstalled MySQL 5.5
-    #}
+    {% if cloud_provider != 'aws' %}
     create_mysql_community_repo
     {% endif %}
 
@@ -176,7 +186,8 @@ main() {
     create_db_init_sql_file_psql
     {% endif %}
 
-    {% if cloud_provider != 'amazon' %}
+
+    {% if cloud_provider != 'aws' %}
     install_mysql_server
     {% endif %}
 
@@ -185,6 +196,7 @@ main() {
     {% if operating_system.startswith('sles') %}
     init_db_bootstrap_script_psql
     {% endif %}
+
 }
 
 main

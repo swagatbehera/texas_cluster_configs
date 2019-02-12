@@ -1,0 +1,199 @@
+{
+  "general": {
+    "name": "{{ generated.cluster_name }}",
+    {% if cloud_provider == 'yarn' %}
+    "credentialName": "ycloud"
+      {% elif cloud_provider == 'openstack' %}
+                        "credentialName": "openstack"
+      {% elif cloud_provider == 'azure' %}
+                        "credentialName": "qaas-cloudbreak-azure"
+      {% elif cloud_provider == 'aws' %}
+                        "credentialName": "qaas-cloudbreak-aws"
+      {% endif %}
+  },
+  "tags": {
+    "userDefinedTags": {}
+  },
+  "parameters": {
+    {% if cloud_provider == 'yarn' %}
+    "yarnQueue": "{{ ycloud_queue }}",
+    "lifeTime": -1
+      {% elif cloud_provider == 'azure' %}
+                  "encryptStorage": "false"
+      {% endif %}
+  },
+  {% if cloud_provider in ('azure', 'aws') %}
+  "customDomain": {
+    "clusterNameAsSubdomain": false,
+    "hostgroupNameAsHostname": false
+  },
+  {% endif %}
+  "placement": {
+    {% if cloud_provider == 'openstack' %}
+    "availabilityZone": "nova",
+    "region": "RegionOne"
+      {% elif cloud_provider == 'azure' %}
+                "region": "North Europe"
+      {% elif cloud_provider == 'aws' %}
+                "availabilityZone": "us-west-1a",
+    "region": "us-west-1"
+      {% else %}
+                "region": "default"
+      {% endif %}
+  },
+  "flexId": null,
+  "cluster": {
+    "ambari": {
+      "userName": "{{ ambari_username }}",
+      "password": "{{ ambari_password }}",
+      "blueprintName": "{{ generated.cluster_name }}",
+      "ambariRepoDetailsJson": {
+        "version": "{{ ambari.version }}",
+        "baseUrl": "{{ generated.ambari.repo_url }}",
+        "gpgKeyUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+      },
+      "ambariStackDetails": {
+        "stack": "{{ stack }}",
+        "version": "{{ stack_major_version }}",
+        "verify": false,
+        "enableGplRepo": true,
+        "repositoryVersion": "{{ stack_version_with_build }}",
+        "versionDefinitionFileUrl": "{{ generated.ambari.stack_vdf_url }}"
+      },
+      {% if custom.enable_knox_proxy == 'true' %}
+      {% include "common-template/knox_sso.json.j2" %},
+      {% endif %}
+      "validateBlueprint": false,
+      {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+      {% include "common-template/kerberos_configs.json.j2" %},
+      "ambariSecurityMasterKey": "",
+      "enableSecurity": true
+        {% else %}
+                          "ambariSecurityMasterKey": ""
+        {% endif %}
+    },
+    "sharedService": {},
+    {% if custom.enable_knox_proxy == 'true' %}
+    "ldapConfigName": "qa-nano-ldap",
+    {% endif %}
+    "rdsConfigNames": []
+  },
+  "imageSettings": {
+    "imageId": "{{ image.uuid }}",
+    "imageCatalog": "{{ image.catalog }}"
+  },
+  "instanceGroups": [
+  {% for node in range(1, 5) %}
+  {
+    "template": {
+      {% if cloud_provider == 'yarn' %}
+      {% if (node == 2 or node == 3) %}
+      "customInstanceType": {
+        "cpus": 4,
+        "memory": 32768
+      }
+        {% else %}
+                              "customInstanceType": {
+                                "cpus": 4,
+                                "memory": 20480
+                              }
+        {% endif %}
+        {% elif cloud_provider == 'openstack' %}
+                              "parameters": {
+                                "encrypted": false
+                              },
+      "instanceType": "cloudbreak",
+      "volumeType": "HDD",
+      "volumeCount": 0,
+      "volumeSize": 100
+        {% elif cloud_provider == 'aws' %}
+                      "parameters": {
+                        "encrypted": false
+                      },
+      "instanceType": "m4.xlarge",
+      "volumeType": "standard",
+      "volumeCount": 1,
+      "volumeSize": 100
+        {% elif cloud_provider == 'azure' %}
+                      "parameters": {
+                        "encrypted": false,
+                        "managedDisk": true
+                      },
+      "instanceType": "Standard_D3_v2",
+      "volumeType": "Standard_LRS",
+      "volumeCount": 1,
+      "volumeSize": 100
+        {% endif %}
+    },
+    {% if node == 1 %}
+    "nodeCount": 1,
+    "group": "host_group_gateway",
+    {% elif node == 2 %}
+    "nodeCount": 1,
+    "group": "host_group_master",
+    {% elif node == 3 %}
+    "nodeCount": 1,
+    "group": "host_group_ha_master",
+    {% else %}
+    "nodeCount": 3,
+    "group": "host_group_slave",
+    {% endif %}
+    "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
+    "recoveryMode": "MANUAL",
+    "securityGroup": {
+      {% if cloud_provider == 'openstack' %}
+      "securityGroupId": "8a35943b-dffc-4cd4-8999-47653afed4e3"
+        {% elif cloud_provider in ('azure', 'aws') %}
+                           "securityRules": [
+                           {% if node == 1 %}
+                           {
+                             "subnet": "0.0.0.0/0",
+                             "ports": "443",
+                             "protocol": "tcp"
+                           },
+                           {
+                             "subnet": "0.0.0.0/0",
+                             "ports": "9443",
+                             "protocol": "tcp"
+                           },
+                           {% endif %}
+                           {
+                             "subnet": "0.0.0.0/0",
+                             "ports": "22",
+                             "protocol": "tcp"
+                           },
+                           {
+                             "subnet": "192.175.27.2/32",
+                             "ports": "1-65000",
+                             "protocol": "tcp"
+                           },
+                           {
+                             "subnet": "192.175.27.10/32",
+                             "ports": "1-65000",
+                             "protocol": "tcp"
+                           }
+                           ]
+        {% endif %}
+    },
+    "recipeNames": [
+    {% if node == 1 %}
+    "{{ generated.cluster_name }}-db-bootstrap-sh-pre-ambari-start",
+    "{{ generated.cluster_name }}-setup-ha-sh-pre-ambari-start",
+    {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+    "{{ generated.cluster_name }}-ha-security-ds-sh-post-cluster-install",
+    {% endif %}
+    {% endif %}
+    "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
+    "{{ generated.cluster_name }}-pyenv-setup-sh-pre-ambari-start",
+    "{{ generated.cluster_name }}-collect-logs-sh-pre-termination",
+    "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
+    "{{ generated.cluster_name }}-hwqe-grpc-sh-pre-ambari-start"
+    ]
+      {{ '},' if node < 4 else '}' }}
+  {% endfor %}
+  ],
+  "stackAuthentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB/hBQfzF91SExZ4MglU7eX26RfIEsz5aCGzzbaGeQG7Jch5XIWHE192A/5jRUZy2eU5sFMsYS32LEqKSVJn5N/5P7yE2QvcTUosM7wHWQW4JrImL0PTJTPXRc/QvkGPka3LvBCL6PlVENyGGo+C3D+dgSloaBeZ9URk0I+Yc/VsihQoMdkVOYIKAGxZlG/JBEBBjCZ5ng4WlzdfcsKgtUGbr6nOn3mqK8/Pkv8CeWguEYaibj5Os6ydmHVZ30w0tLD6Gu7UH14M3M3LnNlCndSLG4bRzUP6OxGEFWlG8GPJnv3Z3h3obqK3jIAsx8GHR9ExR8YdNlvkigbQg8xDGJ hw-qe@hortonworks.com",
+    "publicKeyId": null
+  }
+}

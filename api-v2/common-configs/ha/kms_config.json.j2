@@ -1,0 +1,39 @@
+      {
+			"kms-site": {
+				"properties": {
+					"hadoop.kms.proxyuser.HTTP.hosts": "*",
+					"hadoop.kms.proxyuser.HTTP.users": "*",
+					"hadoop.kms.proxyuser.ambari.hosts": "*",
+					"hadoop.kms.proxyuser.ambari.users": "*",
+					"hadoop.kms.proxyuser.hive.hosts": "*",
+					"hadoop.kms.proxyuser.hive.users": "*",
+					"hadoop.kms.proxyuser.oozie.hosts": "*",
+					"hadoop.kms.proxyuser.oozie.users": "*",
+					"hadoop.kms.proxyuser.yarn.hosts": "*",
+					"hadoop.kms.proxyuser.yarn.users": "*"
+				}
+			}
+		},
+		{
+			"kms-env": {
+				"properties": {
+					"kms_group": "kms",
+					"kms_user": "kms"
+				}
+			}
+		}, {
+			"kms-properties": {
+				"properties": {
+					"DB_FLAVOR": "MYSQL",
+					"KMS_MASTER_KEY_PASSWD": "rangerlogger",
+					"SQL_CONNECTOR_JAR": "/usr/share/java/mysql-connector-java.jar",
+					"db_host": "ambari-server.hwx.site",
+					"db_name": "rangerkms",
+					"db_password": "rangerkms",
+					"db_root_password": "mysql",
+					"db_root_user": "root",
+					"db_user": "rangerkms",
+					"ranger.ks.jpa.jdbc.url": "jdbc:mysql://ambari-server.hwx.site:3306/rangerkms"
+				}
+			}
+		}

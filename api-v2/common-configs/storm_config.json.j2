@@ -1,0 +1,20 @@
+{
+  "storm-env": {
+    "properties": {
+      "jmxremote_port": "26431",
+      "storm_log_dir": "/grid/0/log/storm",
+      "storm_user": "storm"
+    }
+  }
+},
+{
+  "storm-site": {
+    "properties": {
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "nimbus.authorizer": "org.apache.ranger.authorization.storm.authorizer.RangerStormAuthorizer",
+      {% endif %}
+      "storm.zookeeper.session.timeout": "90000",
+      "topology.max.spout.pending": "100000"
+    }
+  }
+}

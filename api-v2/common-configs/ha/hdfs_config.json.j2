@@ -1,0 +1,82 @@
+{
+  "hdfs-site": {
+    "properties": {
+      "dfs.client.failover.proxy.provider.mycluster": "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+      "dfs.datanode.data.dir": "/grid/0/hadoop/hdfs/data",
+      "dfs.datanode.https.address": "0.0.0.0:20475",
+      "dfs.disk.balancer.enabled": "true",
+      "dfs.ha.automatic-failover.enabled": "true",
+      "dfs.ha.fencing.methods": "shell(/bin/true)",
+      "dfs.ha.namenodes.mycluster": "nn1,nn2",
+      "dfs.hosts.exclude": "/etc/hadoop/conf/dfs.exclude",
+      "dfs.http.policy": "HTTP_ONLY",
+      "dfs.https.port": "20470",
+      "dfs.journalnode.edits.dir": "/hadoop/hdfs/journal",
+      "dfs.journalnode.http-address": "0.0.0.0:8480",
+      "dfs.namenode.accesstime.precision": "0",
+      "dfs.namenode.avoid.read.stale.datanode": "true",
+      "dfs.namenode.avoid.write.stale.datanode": "true",
+      "dfs.namenode.checkpoint.dir": "/hadoop/hdfs/namesecondary",
+      "dfs.namenode.checkpoint.edits.dir": "${dfs.namenode.checkpoint.dir}",
+      "dfs.namenode.checkpoint.period": "21600",
+      "dfs.namenode.checkpoint.txns": "1000000",
+      "dfs.namenode.handler.count": "40",
+      "dfs.namenode.http-address": "%HOSTGROUP::host_group_master%:20070",
+      "dfs.namenode.http-address.mycluster.nn1": "%HOSTGROUP::host_group_master%:20070",
+      "dfs.namenode.http-address.mycluster.nn2": "%HOSTGROUP::host_group_ha_master%:20070",
+      "dfs.namenode.https-address": "%HOSTGROUP::host_group_master%:20470",
+      "dfs.namenode.https-address.mycluster.nn1": "%HOSTGROUP::host_group_master%:20470",
+      "dfs.namenode.https-address.mycluster.nn2": "%HOSTGROUP::host_group_ha_master%:20470",
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "dfs.namenode.inode.attributes.provider.class": "org.apache.ranger.authorization.hadoop.RangerHdfsAuthorizer",
+      {% endif %}
+      "dfs.namenode.name.dir": "/hadoop/hdfs/namenode",
+      "dfs.namenode.name.dir.restore": "true",
+      "dfs.namenode.rpc-address": "%HOSTGROUP::host_group_master%:8020",
+      "dfs.namenode.rpc-address.mycluster.nn1": "%HOSTGROUP::host_group_master%:8020",
+      "dfs.namenode.rpc-address.mycluster.nn2": "%HOSTGROUP::host_group_ha_master%:8020",
+      "dfs.namenode.safemode.extension": "5000",
+      "dfs.namenode.safemode.threshold-pct": "1",
+      "dfs.namenode.secondary.http-address": "0.0.0.0:50090",
+      "dfs.namenode.shared.edits.dir": "qjournal://localhost:8485/mycluster",
+      "dfs.nameservices": "mycluster",
+      "dfs.replication": "3",
+      "dfs.replication.max": "50",
+      "dfs.support.append": "true",
+      "nfs.udp.client.portmap.timeout.millis": "5000"
+    }
+  }
+},
+{
+  "core-site": {
+    "properties": {
+      "fs.azure.account.key.hwxasvtesting.blob.core.windows.net": "R/1hsiE/qdHPZU9yfrSPlOcJ7AvPAtdsaNyRxaWC++NkU8jxHNC1m6ZsuOpRqyodiP/Fnn29NrI+/zZ4nEJN6A==",
+      "fs.defaultFS": "hdfs://mycluster",
+      "ha.failover-controller.active-standby-elector.zk.op.retries": "120",
+      "ha.zookeeper.quorum": "%HOSTGROUP::host_group_slave%:2181",
+      "hadoop.proxyuser.hdfs.groups": "*",
+      "hadoop.proxyuser.hdfs.hosts": "*",
+      "hadoop.proxyuser.hive.hosts": "*",
+      "hadoop.proxyuser.falcon.groups": "*",
+      "hadoop.proxyuser.falcon.hosts": "*",
+      "hadoop.proxyuser.hcat.groups": "*",
+      "hadoop.proxyuser.hcat.hosts": "%HOSTGROUP::host_group_master%,%HOSTGROUP::host_group_ha_master%",
+      "hadoop.proxyuser.hive.groups": "*",
+      "hadoop.proxyuser.oozie.groups": "*",
+      "hadoop.proxyuser.oozie.hosts": "*",
+      "io.compression.codec.lzo.class": "com.hadoop.compression.lzo.LzoCodec",
+      "io.compression.codecs": "org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.SnappyCodec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec",
+      "proxyuser_group": "users"
+    }
+  }
+},
+{
+  "hadoop-env": {
+    "properties": {
+      "hdfs_log_dir_prefix": "/grid/0/log/hdfs",
+      "hdfs_user": "hdfs",
+      "namenode_heapsize": "1500",
+      "proxyuser_group": "users"
+    }
+  }
+}

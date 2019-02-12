@@ -1,0 +1,54 @@
+{
+  "yarn-site": {
+    "properties": {
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "yarn.authorization-provider": "org.apache.ranger.authorization.yarn.authorizer.RangerYarnAuthorizer",
+      {% endif %}
+      "yarn.log-aggregation-status.time-out.ms": "180000",
+      "yarn.nodemanager.address": "0.0.0.0:25454",
+      "yarn.nodemanager.delete.debug-delay-sec": "3600",
+      "yarn.nodemanager.local-dirs": "/grid/0/hadoop/yarn/local",
+      "yarn.nodemanager.log-dirs": "/grid/0/hadoop/yarn/log",
+      "yarn.timeline-service.enabled": "true",
+      "yarn.timeline-service.leveldb-state-store.path": "/grid/0/hadoop/yarn/timeline",
+      "yarn.timeline-service.leveldb-timeline-store.path": "/grid/0/hadoop/yarn/timeline",
+      "yarn.timeline-service.leveldb-timeline-store.read-cache-size": "104857600",
+      "yarn.timeline-service.leveldb-timeline-store.start-time-read-cache-size": "10000"
+    }
+  }
+},
+{
+  "yarn-env": {
+    "properties": {
+      "yarn_log_dir_prefix": "/grid/0/log/yarn",
+      "yarn_user": "yarn"
+    }
+  }
+},
+
+{
+  "yarn-hbase-env": {
+    "properties": {
+      "yarn_hbase_log_level": "DEBUG"
+    }
+  }
+},
+{
+  "yarn-hbase-site": {
+    "properties": {
+      "hbase.master.hfilecleaner.ttl": "604800000",
+      "hbase.master.logcleaner.ttl": "604800000",
+      "hbase.master.namespace.init.timeout": "86400000"
+    }
+  }
+},
+{
+  "capacity-scheduler": {
+    "properties": {
+      "yarn.scheduler.capacity.maximum-am-resource-percent": "0.4",
+      "yarn.scheduler.capacity.root.acl_submit_applications": "hive,zeppelin,hbase,ambari-qa users",
+      "yarn.scheduler.capacity.root.default.acl_administer_jobs": "hive,zeppelin,hbase,ambari-qa users",
+      "yarn.scheduler.capacity.root.default.acl_submit_applications": "hive,zeppelin,hbase,ambari-qa users"
+    }
+  }
+}

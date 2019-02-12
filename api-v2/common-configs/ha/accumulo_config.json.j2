@@ -1,0 +1,17 @@
+{
+    "accumulo-env": {
+        "properties": {
+            "accumulo.log.dir": "/grid/0/log/accumulo",
+            "instance_secret": "secret",
+            "accumulo_root_password": "password",
+            "trace_password": "secret"
+        }
+    }
+},
+{
+      "accumulo-site": {
+        "properties": {
+          "instance.volumes": "hdfs://mycluster/apps/accumulo/data"
+        }
+      }
+}

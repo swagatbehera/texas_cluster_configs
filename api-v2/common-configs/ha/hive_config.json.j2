@@ -1,0 +1,67 @@
+{
+  "hive-env": {
+    "properties": {
+      "hcat_user": "hcat",
+      "hive_database": "Existing MySQL / MariaDB Database",
+      "hive_database_type": "mysql",
+      "hive_existing_mysql_database": "MySQL",
+      "hive_log_dir": "/grid/0/log/hive",
+      "hive_metastore_user_passwd": "password",
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "hive_security_authorization": "Ranger",
+      {% endif %}
+      "hive_user": "hive",
+      "webhcat_user": "hcat"
+    }
+  }
+},
+{
+  "hive-interactive-site": {
+    "properties": {
+      "hive.llap.io.allocator.mmap.path": "/tmp"
+    }
+  }
+},
+{
+  "hive-site": {
+    "properties": {
+      "ambari.hive.db.schema.name": "hivedb",
+      "atlas.hook.hive.maxThreads": "1",
+      "atlas.hook.hive.minThreads": "1",
+      "hive.execution.engine": "tez",
+      "hive.metastore.uris": "thrift://%HOSTGROUP::host_group_ha_master%:9083,thrift://%HOSTGROUP::host_group_master%:9083",
+      "hive.query.results.cache.enabled": "false",
+      "hive.security.authorization.enabled": "true",
+      "hive.server2.enable.doAs": "false",
+      "hive.tez.container.size": "4096",
+      "hive.tez.java.opts": "-server -Djava.net.preferIPv4Stack=true -XX:NewRatio=8 -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB -XX:+PrintGCDetails -verbose:gc -XX:+PrintGCTimeStamps",
+      {% if operating_system.startswith('centos') %}
+      "javax.jdo.option.ConnectionDriverName": "com.mysql.jdbc.Driver",
+      "javax.jdo.option.ConnectionURL": "jdbc:mysql://ambari-server.hwx.site/hivedb?createDatabaseIfNotExist=true",
+      {% endif %}
+      "javax.jdo.option.ConnectionPassword": "password",
+      "javax.jdo.option.ConnectionUserName": "hiveuser"
+    }
+  }
+},
+{
+  "hiveserver2-site": {
+    "properties": {
+      "hive.conf.restricted.list": "hive.security.authorization.enabled,hive.security.authorization.manager,hive.security.authenticator.manager",
+      "hive.security.authenticator.manager": "org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator",
+      {% if security.value in ('ranger', 'ranger+tde') %}
+      "hive.security.authorization.manager": "org.apache.ranger.authorization.hive.authorizer.RangerHiveAuthorizerFactory",
+      {% endif %}
+      "hive.security.authorization.enabled": "true"
+    }
+  }
+},
+{
+  "hive-interactive-env": {
+    "properties": {
+      "enable_hive_interactive": "true",
+      "hive_server_interactive_host": "%HOSTGROUP::host_group_master%",
+      "num_retries_for_checking_llap_status": "10"
+    }
+  }
+}

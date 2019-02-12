@@ -1,0 +1,44 @@
+{
+  "Blueprints": {
+    "blueprint_name": "{{ generated.cluster_name }}",
+    "stack_name": "{{ stack }}",
+    {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+    {% include ["common-configs/ha/kerberos_descriptor.json.j2","common-configs/ha/kerberos_descriptor.json.j2"] %},
+    {% endif %}
+    "stack_version": "{{ stack_major_version }}"
+  },
+  "configurations": [
+  {% if 'ranger+tde' in security.value %}
+  {% include ["common-configs/ha/kms_config.json.j2","../common-configs/ha/kms_config.json.j2"] %},
+  {% endif %}
+  {% if security.value in ('ranger', 'ranger+tde') %}
+  {% include ["common-configs/ha/ranger_config.json.j2","../common-configs/ha/ranger_config.json.j2"] %},
+  {% endif %}
+  {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+  {% include ["common-configs/ha/kerberos_config.json.j2","../common-configs/ha/kerberos_config.json.j2"] %},
+  {% endif %}
+  {% include ["common-configs/ha/mapreduce_config.json.j2","../common-configs/ha/mapreduce_config.json.j2"] %},
+  {% include ["common-configs/ha/hdfs_config.json.j2","../common-configs/ha/hdfs_config.json.j2"] %},
+  {% include ["common-configs/ha/zookeeper_config.json.j2","../common-configs/ha/zookeeper_config.json.j2"] %},
+  {% include ["common-configs/ha/yarn_config.json.j2","../common-configs/ha/yarn_config.json.j2"] %},
+  {% include ["common-configs/ha/tez_config.json.j2","../common-configs/ha/tez_config.json.j2"] %},
+  {% include ["common-configs/ha/sqoop_config.json.j2","../common-configs/ha/sqoop_config.json.j2"] %},
+  {% include ["common-configs/ha/logsearch_config.json.j2","../common-configs/ha/ogsearch_config.json.j2"] %},
+  {% include ["common-configs/ha/zeppelin_config.json.j2","../common-configs/ha/zeppelin_config.json.j2"] %},
+  {% include ["common-configs/ha/ams_config.json.j2","../common-configs/ha/ams_config.json.j2"] %},
+  {% include ["common-configs/ha/infrasolr_config.json.j2","../common-configs/ha/infrasolr_config.json.j2"] %},
+  {% include ["common-configs/ha/storm_config.json.j2","../common-configs/ha/storm_config.json.j2"] %},
+  {% include ["common-configs/ha/oozie_config.json.j2","../common-configs/ha/oozie_config.json.j2"] %},
+  {% include ["common-configs/ha/kafka_config.json.j2","../common-configs/ha/kafka_config.json.j2"] %},
+  {% include ["common-configs/ha/hive_config.json.j2","../common-configs/ha/hive_config.json.j2"] %},
+  {% include ["common-configs/ha/hbase_config.json.j2","../common-configs/ha/hbase_config.json.j2"] %},
+  {% include ["common-configs/ha/phoenix_config.json.j2","../common-configs/ha/phoenix_config.json.j2"] %},
+  {% include ["common-configs/ha/accumulo_config.json.j2","../common-configs/ha/accumulo_config.json.j2"] %},
+  {% include ["common-configs/ha/atlas_config.json.j2","../common-configs/ha/atlas_config.json.j2"] %},
+  {% include ["common-configs/ha/knox_config.json.j2","../common-configs/ha/knox_config.json.j2"] %},
+  {% include ["common-configs/ha/spark_config.json.j2","../common-configs/ha/spark_config.json.j2"] %},
+  {% include ["common-configs/ha/cluster_config.json.j2","../common-configs/ha/cluster_config.json.j2"] %}
+
+  ],
+  {% include ["topology/topology.json.j2","../common-topology/topology.json.j2"] %}
+}

@@ -1,0 +1,124 @@
+{
+  "ranger-knox-plugin-properties": {
+    "properties": {
+      "XAAUDIT.DB.IS_ENABLED": "false",
+      "common.name.for.certificate": "",
+      "ranger-knox-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-admin-site": {
+    "properties": {
+      "ranger.audit.source.type": "solr",
+      {% if operating_system.startswith('centos') %}
+      "ranger.jpa.jdbc.driver": "com.mysql.jdbc.Driver",
+      "ranger.jpa.jdbc.url": "jdbc:mysql://ambari-server.hwx.site:3306/ranger"
+        {% endif %}
+    }
+  }
+},
+{
+  "ranger-kafka-plugin-properties": {
+    "properties": {
+      "ranger-kafka-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-storm-plugin-properties": {
+    "properties": {
+      "ranger-storm-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-env": {
+    "properties": {
+      "admin_password": "Rangerpassword@123",
+      "is_external_solrCloud_enabled": "false",
+      "is_external_solrCloud_kerberos": "false",
+      "is_solrCloud_enabled": "true",
+      "keyadmin_user_password": "Rangerpassword@123",
+      "ranger-atlas-plugin-enabled": "Yes",
+      "ranger-hbase-plugin-enabled": "Yes",
+      "ranger-hdfs-plugin-enabled": "Yes",
+      "ranger-hive-plugin-enabled": "Yes",
+      "ranger-kafka-plugin-enabled": "Yes",
+      "ranger-knox-plugin-enabled": "Yes",
+      "ranger-storm-plugin-enabled": "Yes",
+      "ranger-yarn-plugin-enabled": "Yes",
+      "ranger_admin_password": "Rangerpassword@123",
+      "ranger_group": "ranger",
+      {% if operating_system.startswith('centos') %}
+      "ranger_privelege_user_jdbc_url": "jdbc:mysql://ambari-server.hwx.site",
+      {% endif %}
+      "ranger_user": "ranger",
+      "rangertagsync_user_password": "Rangerpassword@123",
+      "rangerusersync_user_password": "Rangerpassword@123",
+      "xasecure.audit.destination.solr": "true"
+    }
+  }
+},
+{
+  "ranger-yarn-plugin-properties": {
+    "properties": {
+      "REPOSITORY_CONFIG_USERNAME": "yarn",
+      "common.name.for.certificate": "-",
+      "policy_user": "ambari-qa",
+      "ranger-yarn-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-atlas-plugin-properties": {
+    "properties": {
+      "REPOSITORY_CONFIG_USERNAME": "atlas",
+      "ranger-atlas-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-hive-plugin-properties": {
+    "properties": {
+      "ranger-hive-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-hdfs-plugin-properties": {
+    "properties": {
+      "REPOSITORY_CONFIG_USERNAME": "hadoop",
+      "common.name.for.certificate": "-",
+      "policy_user": "ambari-qa",
+      "ranger-hdfs-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "ranger-hbase-plugin-properties": {
+    "properties": {
+      "ranger-hbase-plugin-enabled": "Yes"
+    }
+  }
+},
+{
+  "admin-properties": {
+    "properties": {
+      {% if operating_system.startswith('centos') %}
+      "DB_FLAVOR": "MYSQL",
+      "SQL_CONNECTOR_JAR": "/usr/share/java/mysql-connector-java.jar",
+      "db_root_password": "mysql",
+      "db_root_user": "root",
+      {% endif %}
+      "audit_db_name": "ranger_audit",
+      "audit_db_password": "rangerlogger",
+      "audit_db_user": "rangerlogger",
+      "db_host": "ambari-server.hwx.site",
+      "db_name": "ranger",
+      "db_password": "rangeradmin",
+      "db_user": "rangeradmin",
+      "policymgr_external_url": "http://%HOSTGROUP::host_group_master%:6080"
+    }
+  }
+}
