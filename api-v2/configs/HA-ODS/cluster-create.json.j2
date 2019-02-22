@@ -178,7 +178,7 @@
     "recipeNames": [
     {% if node == 1 %}
     "{{ generated.cluster_name }}-db-bootstrap-sh-pre-ambari-start",
-    "{{ generated.cluster_name }}-setup-ha-sh-pre-ambari-start",
+
     {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
     "{{ generated.cluster_name }}-ha-security-ods-sh-post-cluster-install",
     {% endif %}

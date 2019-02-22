@@ -127,7 +127,7 @@ chmod 0600 /root/.ssh/config
 [ -d /root/ansible-ambari-tools ] || git clone git@github.com:kishorramakrishnan/ansible-ambari-tools.git
 playbook_dir=/root/ansible-ambari-tools
 cd ${playbook_dir}
-git checkout ha-knox
+git checkout ha-ranger
 touch inventory/hosts
 install_ranger=false
 
