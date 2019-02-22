@@ -1,8 +1,9 @@
 {
+  {% include ["common-configs/cluster_common_recovery_config.json.j2"] %},
   "Blueprints": {
     "blueprint_name": "{{ generated.cluster_name }}",
     "stack_name": "{{ stack }}",
-     {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
+    {% if security.value in ('kerberos', 'ranger', 'ranger+tde') %}
     {% include ["common-configs/kerberos_descriptor.json.j2","HA-Master/common-configs/kerberos_descriptor.json.j2"] %},
     {% endif %}
     "stack_version": "{{ stack_major_version }}"
@@ -32,3 +33,4 @@
 
   ],
   {% include ["topology/topology.json.j2","../common-topology/topology.json.j2"] %}
+}
