@@ -5,7 +5,7 @@
 			"atlas.authorizer.impl": "ranger",
 			{% endif %}
 			"atlas.graph.storage.hostname": "%HOSTGROUP::host_group_slave%:2181",
-			"atlas.rest.address": "http://%HOSTGROUP::host_group_master%:21000"
+			"atlas.rest.address": "http://%HOSTGROUP::host_group_master%:21000,http://%HOSTGROUP::host_group_ha_master%:21000"
 		}
 	}
 },
