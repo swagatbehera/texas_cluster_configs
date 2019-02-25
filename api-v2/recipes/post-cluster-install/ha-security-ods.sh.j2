@@ -148,15 +148,15 @@ pip install -r ${playbook_dir}/requirements.txt
 cat <<EOT >> group_vars/all.yaml
 cluster_name: {{ generated.cluster_name }}
 install_ranger: ${install_ranger}
-install_knox: true
+install_knox: false
 install_oozie: false
 install_storm: false
 install_hbase: true
 install_hdfs: true
 install_yarn: true
 install_hive: false
-install_atlas: true
-install_kafka: true
+install_atlas: false
+install_kafka: false
 EOT
 #sed -i 's/inventory = .*/inventory = inventory\//g' ansible.cfg
 
