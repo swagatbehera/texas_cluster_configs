@@ -1,156 +1,436 @@
 {
-  "cdhVersion": "6.1.1",
-  "services": [
-    {
-      "refName": "isilon",
-      "serviceType": "ISILON",
-      "serviceConfigs": [
-        {
-          "name": "default_fs_name",
-          "value": "hdfs"
-        }
-      ]
-    },
-    {
-      "refName": "zookeeper",
-      "serviceType": "ZOOKEEPER",
-      "roleConfigGroups": [
-        {
-          "refName": "zookeeper-SERVER-BASE",
-          "roleType": "SERVER",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "hdfs",
-      "serviceType": "HDFS",
-      "roleConfigGroups": [
-        {
-          "refName": "hdfs-NAMENODE-BASE",
-          "roleType": "NAMENODE",
-          "configs": [
-            {
-              "name": "dfs_name_dir_list",
-              "value": "/hadoopfs/fs1/namenode"
-            }
-          ],
-          "base": true
-        },
-        {
-          "refName": "hdfs-SECONDARYNAMENODE-BASE",
-          "roleType": "SECONDARYNAMENODE",
-          "configs": [
-            {
-              "name": "fs_checkpoint_dir_list",
-              "value": "/hadoopfs/fs1/secondarynamenode"
-            }
-          ],
-          "base": true
-        },
-        {
-          "refName": "hdfs-DATANODE-BASE",
-          "roleType": "DATANODE",
-          "configs": [
-            {
-              "name": "dfs_data_dir_list",
-              "value": "/hadoopfs/fs1/datanode"
-            },
-            {
-              "name": "dfs_datanode_failed_volumes_tolerated",
-              "value": "0"
-            }
-          ],
-          "base": true
-        },
-        {
-          "refName": "hdfs-BALANCER-BASE",
-          "roleType": "BALANCER",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "yarn",
-      "serviceType": "YARN",
-      "roleConfigGroups": [
-        {
-          "refName": "yarn-RESOURCEMANAGER-BASE",
-          "roleType": "RESOURCEMANAGER",
-          "base": true
-        },
-        {
-          "refName": "yarn-NODEMANAGER-BASE",
-          "roleType": "NODEMANAGER",
-          "configs": [
-            {
-              "name": "yarn_nodemanager_local_dirs",
-              "value": "/hadoopfs/fs1/nodemanager"
-            }
-          ],
-          "base": true
-        },
-        {
-          "refName": "yarn-JOBHISTORY-BASE",
-          "roleType": "JOBHISTORY",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "hive",
-      "serviceType": "HIVE",
-      "serviceConfigs": [
-        {
-          "name": "hive_metastore_database_password",
-          "variable": "hive-hive_metastore_database_password"
-        },
-        {
-          "name": "hive_metastore_database_port",
-          "variable": "hive-hive_metastore_database_port"
-        },
-        {
-          "name": "hive_metastore_database_host",
-          "variable": "hive-hive_metastore_database_host"
-        },
-        {
-          "name": "hive_metastore_database_type",
-          "variable": "hive-hive_metastore_database_type"
-        },
-        {
-          "name": "hive_metastore_database_name",
-          "variable": "hive-hive_metastore_database_name"
-        }
-      ],
-      "roleConfigGroups": [
-        {
-          "refName": "hive-GATEWAY-BASE",
-          "roleType": "GATEWAY",
-          "base": true
-        },
-        {
-          "refName": "hive-HIVESERVER2-BASE",
-          "roleType": "HIVESERVER2",
-          "base": true
-        },
-        {
-          "refName": "hive-HIVEMETASTORE-BASE",
-          "roleType": "HIVEMETASTORE",
-          "base": true
-        }
-      ]
-    }
-  ],
-  "hostTemplates": [
-    {
+  "cdhVersion" : "6.1.1",
+  "products" : null,
+  "services" : [ {
+    "refName" : "ZOOKEEPER-1",
+    "serviceType" : "ZOOKEEPER",
+    "roleConfigGroups" : [ {
+      "refName" : "ZOOKEEPER-1-SERVER-BASE",
+      "roleType" : "SERVER",
+      "base" : true
+    } ]
+  }, {
+    "refName" : "HDFS-1",
+    "serviceType" : "HDFS",
+    "serviceConfigs" : [ {
+      "name" : "dfs_replication",
+      "value" : "3"
+    }, {
+      "name" : "hdfs_blocks_with_corrupt_replicas_thresholds",
+      "value" : "{\"warning\":\"2.5\",\"critical\":\"3.0\"}"
+    }, {
+      "name" : "core_site_safety_valve",
+      "value" : ""
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "HDFS-1-BALANCER-BASE",
+      "roleType" : "BALANCER",
+      "base" : true
+    }, {
+      "refName" : "HDFS-1-GATEWAY-BASE",
+      "roleType" : "GATEWAY",
+      "base" : true
+    }, {
+      "refName" : "HDFS-1-NFSGATEWAY-BASE",
+      "roleType" : "NFSGATEWAY",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "nfsgateway_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "nfsgateway_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "HDFS-1-NAMENODE-1",
+      "roleType" : "NAMENODE",
+      "configs" : [ {
+        "name" : "dfs_http_port",
+        "value" : "20101"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "namenode_config_safety_valve",
+        "value" : "\n        <property>\n          <name>dfs.namenode.redundancy.considerLoad</name>\n          <value>false</value>\n        </property>"
+      }, {
+        "name" : "dfs_https_port",
+        "value" : "20102"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "namenode_data_directories_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "namenode_data_directories_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : false
+    }, {
+      "refName" : "HDFS-1-DATANODE-BASE",
+      "roleType" : "DATANODE",
+      "configs" : [ {
+        "name" : "datanode_config_safety_valve",
+        "value" : "\n        <property>\n          <name>dfs.thrift.datanode.address</name>\n          <value>0.0.0.0:20005</value>\n          <description>\n            The address where the Thrift datanode server will listen to.\n            If the port is 0 then the server will start on a free port.\n          </description>\n        </property>"
+      }, {
+        "name" : "dfs_datanode_ipc_port",
+        "value" : "20001"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "datanode_data_directories_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "dfs_datanode_https_port",
+        "value" : "20004"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "dfs_datanode_port",
+        "value" : "20002"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "dfs_datanode_http_port",
+        "value" : "20003"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "datanode_data_directories_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "HDFS-1-SECONDARYNAMENODE-BASE",
+      "roleType" : "SECONDARYNAMENODE",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "dfs_secondary_http_port",
+        "value" : "20201"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "secondarynamenode_checkpoint_directories_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "dfs_secondary_https_port",
+        "value" : "20202"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "secondarynamenode_checkpoint_directories_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "OOZIE-1",
+    "serviceType" : "OOZIE",
+    "serviceConfigs" : [ {
+      "name" : "oozie_upload_sharelib_concurrency",
+      "value" : "1"
+    }, {
+      "name" : "oozie_upload_sharelib_cmd_timeout",
+      "value" : "540"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "OOZIE-1-OOZIE_SERVER-BASE",
+      "roleType" : "OOZIE_SERVER",
+      "configs" : [ {
+        "name" : "oozie_database_type",
+        "variable" : "OOZIE-1-OOZIE_SERVER-BASE-oozie_database_type"
+      }, {
+        "name" : "oozie_email_smtp_host",
+        "value" : "receive-mail-ec2-1.vpc.cloudera.com"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "oozie_database_password",
+        "variable" : "OOZIE-1-OOZIE_SERVER-BASE-oozie_database_password"
+      }, {
+        "name" : "oozie_database_user",
+        "variable" : "OOZIE-1-OOZIE_SERVER-BASE-oozie_database_user"
+      }, {
+        "name" : "oozie_database_host",
+        "variable" : "OOZIE-1-OOZIE_SERVER-BASE-oozie_database_host"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "oozie_database_name",
+        "variable" : "OOZIE-1-OOZIE_SERVER-BASE-oozie_database_name"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "oozie_email_from_address",
+        "value" : "systest@receive-mail-ec2-1.vpc.cloudera.com"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "HIVE-1",
+    "serviceType" : "HIVE",
+    "serviceConfigs" : [ {
+      "name" : "hive_metastore_database_password",
+      "variable" : "HIVE-1-hive_metastore_database_password"
+    }, {
+      "name" : "hive_metastore_database_name",
+      "variable" : "HIVE-1-hive_metastore_database_name"
+    }, {
+      "name" : "hive_metastore_database_user",
+      "variable" : "HIVE-1-hive_metastore_database_user"
+    }, {
+      "name" : "hive_metastore_database_host",
+      "variable" : "HIVE-1-hive_metastore_database_host"
+    }, {
+      "name" : "hive_metastore_database_type",
+      "variable" : "HIVE-1-hive_metastore_database_type"
+    }, {
+      "name" : "hive_metastore_database_port",
+      "variable" : "HIVE-1-hive_metastore_database_port"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "HIVE-1-HIVEMETASTORE-BASE",
+      "roleType" : "HIVEMETASTORE",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "hive_metastore_java_heapsize",
+        "value" : "1073741824"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "HIVE-1-GATEWAY-BASE",
+      "roleType" : "GATEWAY",
+      "configs" : [ {
+        "name" : "hive_client_config_safety_valve",
+        "value" : "\n      <property>\n        <name>hbase.zookeeper.quorum</name>\n        <value>ajindal-nonsecure-1.vpc.cloudera.com</value>\n      </property>\n      <property>\n        <name>hbase.zookeeper.property.clientPort</name>\n        <value>2181</value>\n      </property>"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "HIVE-1-HIVESERVER2-BASE",
+      "roleType" : "HIVESERVER2",
+      "configs" : [ {
+        "name" : "hiveserver2_downloaded_resources_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "hiveserver2_exec_local_scratch_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "hiveserver2_exec_local_scratch_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "hiveserver2_downloaded_resources_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "HUE-1",
+    "serviceType" : "HUE",
+    "serviceConfigs" : [ {
+      "name" : "database_password",
+      "variable" : "HUE-1-database_password"
+    }, {
+      "name" : "database_port",
+      "variable" : "HUE-1-database_port"
+    }, {
+      "name" : "database_host",
+      "variable" : "HUE-1-database_host"
+    }, {
+      "name" : "database_user",
+      "variable" : "HUE-1-database_user"
+    }, {
+      "name" : "database_name",
+      "variable" : "HUE-1-database_name"
+    }, {
+      "name" : "database_type",
+      "variable" : "HUE-1-database_type"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "HUE-1-HUE_SERVER-BASE",
+      "roleType" : "HUE_SERVER",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "HUE-1-HUE_LOAD_BALANCER-BASE",
+      "roleType" : "HUE_LOAD_BALANCER",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "YARN-1",
+    "serviceType" : "YARN",
+    "roleConfigGroups" : [ {
+      "refName" : "YARN-1-NODEMANAGER-BASE",
+      "roleType" : "NODEMANAGER",
+      "configs" : [ {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "nodemanager_local_data_directories_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "nodemanager_log_directories_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "nodemanager_local_data_directories_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "nodemanager_log_directories_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "nodemanager_recovery_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "nodemanager_recovery_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "YARN-1-JOBHISTORY-BASE",
+      "roleType" : "JOBHISTORY",
+      "configs" : [ {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "YARN-1-GATEWAY-BASE",
+      "roleType" : "GATEWAY",
+      "base" : true
+    }, {
+      "refName" : "YARN-1-RESOURCEMANAGER-1",
+      "roleType" : "RESOURCEMANAGER",
+      "configs" : [ {
+        "name" : "log_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "log_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_percentage_thresholds",
+        "value" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+      }, {
+        "name" : "heap_dump_directory_free_space_absolute_thresholds",
+        "value" : "{\"critical\":\"never\",\"warning\":\"never\"}"
+      }, {
+        "name" : "yarn_scheduler_maximum_allocation_mb",
+        "value" : "8192"
+      } ],
+      "base" : false
+    } ]
+  } ],
+  "hostTemplates" : [ {
       "refName": "master",
       "roleConfigGroupsRefNames": [
+        "hbase-MASTER-BASE",
         "hdfs-BALANCER-BASE",
         "hdfs-NAMENODE-BASE",
         "hdfs-SECONDARYNAMENODE-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
+        "hdfs-NFSGATEWAY-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE"
@@ -162,10 +442,26 @@
       "roleConfigGroupsRefNames": [
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
-        "yarn-NODEMANAGER-BASE"
+        "yarn-NODEMANAGER-WORKER"
+      ],
+      "cardinality": null
+    },
+    {
+      "refName": "compute",
+      "roleConfigGroupsRefNames": [
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-COMPUTE"
       ],
       "cardinality": null
     }
   ],
-  "displayName": "expedite"
+  "displayName": "{{ generated.cluster_name }}",
+  "cmVersion": null,
+  "instantiator": {
+    "clusterName": "{{ generated.cluster_name }}",
+    "hosts": null,
+    "variables": null,
+    "roleConfigGroups": []
+  },
+  "repositories": null
 }
