@@ -77,33 +77,6 @@
       ]
     },
     {
-      "refName": "kafka",
-      "serviceType": "KAFKA",
-      "roleConfigGroups": [
-        {
-          "refName": "kafka-KAFKA_BROKER-BASE",
-          "roleType": "KAFKA_BROKER",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "hbase",
-      "serviceType": "HBASE",
-      "roleConfigGroups": [
-        {
-          "refName": "hbase-REGIONSERVER-BASE",
-          "roleType": "REGIONSERVER",
-          "base": true
-        },
-        {
-          "refName": "hbase-MASTER-BASE",
-          "roleType": "MASTER",
-          "base": true
-        }
-      ]
-    },
-    {
       "refName": "yarn",
       "serviceType": "YARN",
       "roleConfigGroups": [
@@ -128,22 +101,6 @@
         {
           "refName": "yarn-JOBHISTORY-BASE",
           "roleType": "JOBHISTORY",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "spark_on_yarn",
-      "serviceType": "SPARK_ON_YARN",
-      "roleConfigGroups": [
-        {
-          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "roleType": "SPARK_YARN_HISTORY_SERVER",
-          "base": true
-        },
-        {
-          "refName": "spark_on_yarn-GATEWAY-BASE",
-          "roleType": "GATEWAY",
           "base": true
         }
       ]
@@ -190,45 +147,18 @@
           "base": true
         }
       ]
-    },
-    {
-      "refName": "impala",
-      "serviceType": "IMPALA",
-      "roleConfigGroups": [
-        {
-          "refName": "impala-IMPALAD-BASE",
-          "roleType": "IMPALAD",
-          "base": true
-        },
-        {
-          "refName": "impala-STATESTORE-BASE",
-          "roleType": "STATESTORE",
-          "base": true
-        },
-        {
-          "refName": "impala-CATALOGSERVER-BASE",
-          "roleType": "CATALOGSERVER",
-          "base": true
-        }
-      ]
     }
   ],
   "hostTemplates": [
     {
       "refName": "master",
       "roleConfigGroupsRefNames": [
-        "hbase-MASTER-BASE",
         "hdfs-BALANCER-BASE",
         "hdfs-NAMENODE-BASE",
         "hdfs-SECONDARYNAMENODE-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
-        "impala-CATALOGSERVER-BASE",
-        "impala-STATESTORE-BASE",
-        "kafka-KAFKA_BROKER-BASE",
-        "spark_on_yarn-GATEWAY-BASE",
-        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE"
@@ -238,11 +168,8 @@
     {
       "refName": "worker",
       "roleConfigGroupsRefNames": [
-        "hbase-REGIONSERVER-BASE",
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
-        "impala-IMPALAD-BASE",
-        "spark_on_yarn-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
       "cardinality": null

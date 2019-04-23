@@ -61,7 +61,13 @@
     "name": "{{ generated.cluster_name }}",
     "userName": "{{ username }}",
     "password": "{{ password }}",
+    {% if generated.cluster_type == ClusterType.DATALAKE %}
+    "databases": [
+      "{{ datalake_config.hive_metastore_db_name }}"
+    ],
+    {% else %}
     "databases": [],
+    {% endif %}
     "clusterDefinitionName": "{{ generated.cluster_name }}",
     {# TODO: Add Ambari #}
     "cm": {
@@ -82,12 +88,19 @@
   },
 
   "instanceGroups": [
+    {% for node in range(1, 5) %}
     {
       "nodeCount": 1,
-      "name": "{{ 'master' }}",
-      "type": "{{ 'GATEWAY' }}",
+      "name": "{{ 'master' if node == 1 else 'worker' }}",
+      "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
       "recoveryMode": "MANUAL",
-
+      {% if generated.cloud_platform == 'openstack' %}
+      "securityGroup": {
+        "securityGroupIds": ["8a35943b-dffc-4cd4-8999-47653afed4e3"],
+        "securityRules": []
+      },
+      {# TODO: Amazon, AWS - open ports #}
+      {% endif %}
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
         "yarn": {
@@ -104,61 +117,22 @@
             "count": 0
           }
         ]
-
-        {% endif %}
-      }
-    },
-    {
-      "nodeCount": 4,
-      "name": "{{ 'worker' }}",
-      "type": "{{ 'CORE' }}",
-      "recoveryMode": "MANUAL",
-
-      "template": {
-        {% if generated.cloud_platform == 'yarn' %}
-        "yarn": {
-          "memory": 8192,
-          "cpus": 4
-        },
-        "instanceType": "",
+        {% elif generated.cloud_platform == 'openstack' %}
+        "instanceType": "cloudbreak",
         "rootVolume": {
           "size": 100
         },
         "attachedVolumes": [
           {
-            "size": 0,
-            "count": 0
+            "size": 100,
+            "count": 0,
+            "type": "HDD"
           }
         ]
-
+        {# TODO: AWS, Azure, etc. #}
         {% endif %}
       }
-    },
-    {
-      "nodeCount": 1,
-      "name": "{{ 'compute' }}",
-      "type": "{{ 'CORE' }}",
-      "recoveryMode": "MANUAL",
-
-      "template": {
-        {% if generated.cloud_platform == 'yarn' %}
-        "yarn": {
-          "memory": 8192,
-          "cpus": 4
-        },
-        "instanceType": "",
-        "rootVolume": {
-          "size": 100
-        },
-        "attachedVolumes": [
-          {
-            "size": 0,
-            "count": 0
-          }
-        ]
-
-        {% endif %}
-      }
-    }
+    }{{ ',' if not loop.last }}
+    {% endfor %}
   ]
 }
