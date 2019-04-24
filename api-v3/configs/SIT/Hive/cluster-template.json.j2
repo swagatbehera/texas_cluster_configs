@@ -88,19 +88,12 @@
   },
 
   "instanceGroups": [
-    {% for node in range(1, 4) %}
-    {
+  {
       "nodeCount": 1,
-      "name": "{{ 'master' if node == 1 else 'worker' }}",
-      "type": "{{ 'GATEWAY' if node == 1 else 'CORE' }}",
+      "name": "{{ 'master' }}",
+      "type": "{{ 'GATEWAY' }}",
       "recoveryMode": "MANUAL",
-      {% if generated.cloud_platform == 'openstack' %}
-      "securityGroup": {
-        "securityGroupIds": ["8a35943b-dffc-4cd4-8999-47653afed4e3"],
-        "securityRules": []
-      },
-      {# TODO: Amazon, AWS - open ports #}
-      {% endif %}
+
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
         "yarn": {
@@ -117,22 +110,33 @@
             "count": 0
           }
         ]
-        {% elif generated.cloud_platform == 'openstack' %}
-        "instanceType": "cloudbreak",
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 4,
+      "name": "{{ 'worker' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 8192,
+          "cpus": 4
+        },
+        "instanceType": "",
         "rootVolume": {
           "size": 100
         },
         "attachedVolumes": [
           {
-            "size": 100,
-            "count": 0,
-            "type": "HDD"
+            "size": 0,
+            "count": 0
           }
         ]
-        {# TODO: AWS, Azure, etc. #}
         {% endif %}
       }
-    }{{ ',' if not loop.last }}
-    {% endfor %}
+    }
   ]
 }
