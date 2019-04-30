@@ -154,57 +154,19 @@
       "refName": "master",
       "roleConfigGroupsRefNames": [
         "hdfs-BALANCER-BASE",
-        "hdfs-FAILOVERCONTROLLER-BASE",
         "hdfs-NAMENODE-BASE",
-        "hdfs-JOURNALNODE-BASE",
-        "hdfs-GATEWAY-BASE",
-        "hdfs-NFSGATEWAY-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
-        "oozie-OOZIE_SERVER-BASE",
         "zookeeper-SERVER-BASE"
       ],
       "cardinality": null
     },
     {
-      "refName": "worker1",
-      "roleConfigGroupsRefNames": [
-        "hdfs-NAMENODE-BASE",
-        "hdfs-FAILOVERCONTROLLER-BASE",
-        "hdfs-JOURNALNODE-BASE",
-        "hdfs-DATANODE-BASE",
-        "hive-GATEWAY-BASE",
-        "yarn-NODEMANAGER-BASE",
-        "yarn-RESOURCEMANAGER-BASE",
-        "zookeeper-SERVER-BASE"
-      ],
-      "cardinality": null
-    },
-    {
-      "refName": "worker2",
-      "roleConfigGroupsRefNames": [
-        "hdfs-DATANODE-BASE",
-        "hive-GATEWAY-BASE",
-        "hdfs-JOURNALNODE-BASE",
-        "yarn-NODEMANAGER-BASE",
-        "zookeeper-SERVER-BASE"
-      ],
-      "cardinality": null
-    },
-    {
-      "refName": "worker3",
-      "roleConfigGroupsRefNames": [
-        "hdfs-DATANODE-BASE",
-        "hive-GATEWAY-BASE",
-        "yarn-NODEMANAGER-BASE"
-      ],
-      "cardinality": null
-    },
-    {
-      "refName": "worker4",
+      "refName": "worker",
       "roleConfigGroupsRefNames": [
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
