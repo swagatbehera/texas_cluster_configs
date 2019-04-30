@@ -114,8 +114,83 @@
       }
     },
     {
-      "nodeCount": 4,
-      "name": "{{ 'worker' }}",
+      "nodeCount": 1,
+      "name": "{{ 'worker1' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 8192,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 1,
+      "name": "{{ 'worker2' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 8192,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 1,
+      "name": "{{ 'worker3' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 8192,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 1,
+      "name": "{{ 'worker4' }}",
       "type": "{{ 'CORE' }}",
       "recoveryMode": "MANUAL",
 
