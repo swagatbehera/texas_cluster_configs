@@ -93,7 +93,9 @@
       "name": "{{ 'master' }}",
       "type": "{{ 'GATEWAY' }}",
       "recoveryMode": "MANUAL",
-
+      "recipeNames": [
+        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install"
+      ],
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
         "yarn": {
@@ -118,7 +120,9 @@
       "name": "{{ 'worker' }}",
       "type": "{{ 'CORE' }}",
       "recoveryMode": "MANUAL",
-
+      "recipeNames": [
+        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install"
+      ],
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
         "yarn": {
