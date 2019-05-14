@@ -1,0 +1,291 @@
+#!/bin/bash -x
+
+cat > /tmp/id_rsa.pub <<EOF
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5Zx7QmkQF+YIYxZ3z7KeD/CJAkzijm49QHQDIA0AnY2rLqFj09ZvKKFPVh+wnEU4PhKMVAGlBBjlItumxwx90BTstgnQqXK09GR4KBQAq2vpwUz4prkllj84wMrBlIAWcWXSJxO5zI4atcIDBnUw+W0dfgjMzgKAfnrg45xT+rMzQw41t1rtcURO3VgmvDHt1xAAZ/Zo5XjguOhIhdR9IOyTwyowHHcm2IGeuLuOeupAhcQc+7tEX+Jj8fxs9+0tbV4HYG3kM1Xe2r4kq5OPtM4YVOHRvqwmjmClR+i21iAs3EUWVRHI1KYywrULak7u01Y6PnI3pJ7pcO4HchgSR
+EOF
+
+cat > /tmp/id_rsa <<EOF
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEAuWce0JpEBfmCGMWd8+yng/wiQJM4o5uPUB0AyANAJ2Nqy6hY
+9PWbyihT1YfsJxFOD4SjFQBpQQY5SLbpscMfdAU7LYJ0KlytPRkeCgUAKtr6cFM+
+Ka5JZY/OMDKwZSAFnFl0icTucyOGrXCAwZ1MPltHX4IzM4CgH564OOcU/qzM0MON
+bda7XFETt1YJrwx7dcQAGf2aOV44LjoSIXUfSDsk8MqMBx3JtiBnri7jnrqQIXEH
+Pu7RF/iY/H8bPftLW1eB2Bt5DNV3tq+JKuTj7TOGFTh0b6sJo5gpUfottYgLNxFF
+lURyNSmMsK1C2pO7tNWOj5yN6Se6XDuB3IYEkQIDAQABAoIBAQCWeeqZtks1ai+7
++VBctJu1VMNcE+EpcM1dYVzL+U9taJQ6HTWuA1XhOt/n8/yoLLRlhepy1jWXL/z4
+VnTP8SUrHj/MjQ/JfhSg/SzTRwG+xqHy3q0aWTl687+OgOWH/fhv0G70jmBWFORv
+CluGSSujhKQmEV+LEn9jiofMr0jr9WI8zYNEkEonMhCQDCHpYlJ6DPEQ075trKIq
+ZInq225ZbO4zTu+P0zPpjfMuQu4zeQy0gydmvc2yexCt9QlYEPI7B4kgPHMMIDhG
+BD9U5Qj/+BWqv5ra+3nJmkgKhpuNGOeEZCkG3WTdFdXzXf5qTNkl5FJWHUt9li+S
+L6xg4pURAoGBAPLqWakpw/wXlAdPocZhT5SHyzXWgwL0b/U45xVnYpQzwcUIhSDZ
+1Ml31nH2e4bgNQyEJp/61HDn5I9hI1hoFRrgl3BkcsPGVd1vEysqguBEp57naAG3
+j3n9q2VWX1AMTA/8vKlx4MXjvtEw1hK5EFkNT0TLQjMoXOVN+KE1mgnFAoGBAMNj
+tSZXUS5Dyg8JhKx3dZYE4QOa3J4gJBqGhPyCJASJoITw5SccKEoQWxSU0khXM/gg
+OE19Kv4MOAqpKIH1OX5TzkyLhLE16EQCI8PocSfwBYow2FQisjWFvvB6f01lwYth
+eFkcESYJkUJSE1SShbjloc6Q0tdViiWYzDvAbhhdAoGBAMMxmTabfwa1E5gEXyR/
+0Wiy7ZGne8MGFGjifp3uY4JfTJc9T2ykXZ4+k60juQMaasZR8o+fCNJpJHoqPjKu
+ADeGvWns7WNvnlO/C5ImKOB5io/ftu2aSMpoEi/uBczW9M/r8NXf0hRx+0UxjvOg
+jghg74+CHQHqryr7SoyP++VZAoGASnr5lLH4OiCRJ4ZDUtL+ub8GXy9rJcOuv4XD
+r9WUET69N6/0SiJLoV/2uDO6rOTA5Lazf6ZU+x6BRl8RF+j4j5U2sKsGW97muPXv
+2EAE0mqGUhUogXnwYMKo9FZdrI07Z/wxuhYe21cOTi+nOrfXzZGLSoieNoNe89H5
+GFXUIekCgYEAiLwHGduaJMFx7fDM60rwTkGA0FbyP5bH1VgufvlDSspc5rZiGvv3
+Y6AztxdtR+suzNlZPRPYfJIDrSbCYV/zn8OMQtnBEAzV52+5iGGIGkefiVGMkX/A
+XoKMtvnVTd35t9xLAMPvY3nXDxbsiO/pwIAGpXvwvxYe7PUosLGO7e4=
+-----END RSA PRIVATE KEY-----
+EOF
+
+chmod -R 644 /tmp/id_rsa*
+
+chown -R root:root /tmp/id_rsa*
+
+export DEBIAN_FRONTEND=noninteractive
+
+# Wait for cloud-init (if installed) to finish since it sometimes holds exclusive access to package manager
+if [ -d /var/lib/cloud ]; then
+    timeout 600 /bin/bash -c 'until stat /var/lib/cloud/instance/boot-finished 2>/dev/null; do echo "Waiting for cloud-init ..."; sleep 5; done'
+fi
+
+# registercloudguest is provided by SLES to activate the licensed software repos (SMT). It's used by EC2 and GCE. SLES 11 uses init.d, SLES 12 uses systemd.
+if [[ $(pgrep -f registercloudguest) ]]; then
+    # filter pgrep output with 'grep -v' to remove the timeout and bash subprocesses
+    timeout 600 /bin/bash -c 'while [[ $(pgrep -fl registercloudguest | grep -v "bash\|timeout") ]]; do echo "Waiting for SLES license registration..."; sleep 5; done'
+fi
+
+if [ -f /usr/bin/apt-get ]; then
+    while [ `apt-get update >/dev/null 2>&1; echo $?` -gt 0 ]; do echo "Waiting for Ubuntu apt package lock.."; sleep 5; done
+fi
+
+if [ ! -f /usr/bin/lsb_release ]; then
+    if [ -f /usr/bin/apt-get ]; then
+        apt-get -y install lsb-release
+    elif [ -f /usr/bin/zypper ]; then
+        zypper --no-gpg-checks install -y lsb-release
+    elif [ -f /usr/bin/yum ]; then
+        yum -y install redhat-lsb-core redhat-lsb
+    fi
+fi
+
+if [ ! -f /usr/sbin/ntpd ]; then
+    if [ -f /usr/bin/apt-get ]; then
+        apt-get -y install ntp
+    elif [ -f /usr/bin/zypper ]; then
+        zypper --no-gpg-checks install -y ntp
+    elif [ -f /usr/bin/yum ]; then
+        yum -y install ntp
+    fi
+fi
+
+# Install necessary packages
+
+NEEDED_PACKAGES="snmp rsync zip unzip curl lsof vim less wget nvme-cli"
+
+if [ -f /usr/bin/apt-get ]; then
+    while [ `apt-get -y install ${NEEDED_PACKAGES} ; echo $?` -gt 0 ]; do echo "Waiting for Ubuntu apt package lock.."; sleep 5; done
+elif [ -f /usr/bin/zypper ]; then
+    zypper --no-gpg-checks install -y ${NEEDED_PACKAGES}
+elif [ -f /usr/bin/yum ]; then
+    yum -y install ${NEEDED_PACKAGES}
+fi
+
+distro=`lsb_release -i -s`
+rel=`lsb_release -r -s`
+
+
+if [ -f /etc/SuSE-brand ]; then
+    distro="SLES LINUX"
+fi
+if [ -f /etc/SuSE-release ]; then
+    distro="SLES LINUX"
+fi
+
+# vm swappiness
+if [[ $(/sbin/sysctl -n vm.swappiness) -gt 10 ]]; then
+    if grep "^vm.swappiness =.*" /etc/sysctl.conf; then
+        sed -i -r "s:^(vm.swappiness =).*:\\1 10:" /etc/sysctl.conf
+    else
+        echo "vm.swappiness = 10" >> /etc/sysctl.conf
+    fi
+          # -e to ignore unknown keys...
+          # https://bugzilla.redhat.com/show_bug.cgi?id=639821
+    /sbin/sysctl -e -p
+fi
+
+        # ntp
+NTP_CONF=$(find /etc -name ntp.conf)
+perl -p -i.orig -e 's,^server,#$&,g' /etc/ntp.conf
+sed -i '/.*dispersion.*/d' /etc/ntp.conf
+
+for x in $(seq 0 1) ; do
+  echo server $x.ntp.infra.cloudera.com burst iburst >> /etc/ntp.conf
+done
+
+# Tweak /etc/network/if-up.d/ntpdate if it exists
+if [ -f /etc/network/if-up.d/ntpdate ]; then
+    sed -i -r "s:LOCKFILE=/var/lock/ntpdate-ifup:LOCKFILE=/var/lock/ntpdate:g" /etc/network/if-up.d/ntpdate
+fi
+
+sed -i -r "s:^fudge\\s:#fudge :g" $NTP_CONF
+
+
+if [ -f /sbin/chkconfig ]; then
+    if [ -f /etc/init.d/ntp ]; then
+        service ntp stop
+    elif [ -f /etc/init.d/ntpd ]; then
+        service ntpd stop
+    fi
+elif [ -d /etc/systemd ]; then
+    # On a Debian GCE 8.4 system, it's ntp.service, not ntpd.service - so let's check first
+    if [[ $(systemctl status ntpd.service | grep not-found) ]]; then
+        systemctl stop ntp.service || true
+    else
+        systemctl stop ntpd.service || true
+    fi
+fi
+
+/usr/sbin/userdel -rf systest || true
+
+if ! awk -F':' '{ print $1}' /etc/group |grep wheel; then
+    /usr/sbin/groupadd wheel
+fi
+
+if [ "${distro}" == "SLES LINUX" ]; then
+    /usr/sbin/groupadd -g 2000 systest
+    USERADD_ARGS="-g 2000"
+fi
+
+        # systest user
+if ! awk -F':' '{ print $1}' /etc/passwd | grep systest; then
+          # hadoop kerberos wants a uid > 1000
+    /usr/sbin/useradd -m -u 2000 -G wheel ${USERADD_ARGS} systest
+    if [ "${distro}" == "Debian" ]; then
+        echo systest:systest | chpasswd
+    fi
+fi
+su - systest -c '
+              mkdir -p $HOME/.ssh
+              chmod 700 $HOME/.ssh
+              cp /tmp/id_rsa* $HOME/.ssh
+              chmod 600 $HOME/.ssh/id_rsa*
+              cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys'
+
+if ! grep ^systest /etc/sudoers; then
+    echo "systest ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+fi
+
+chsh -s /bin/bash systest
+
+if [ -f /etc/rc.d/rc.local ]; then
+    BOOT_FILE=/etc/rc.d/rc.local
+elif [ -f /etc/rc.local ]; then
+    BOOT_FILE=/etc/rc.local
+elif [ -f /etc/init.d/boot.local ]; then
+    BOOT_FILE=/etc/init.d/boot.local
+fi
+
+if [ -f ${BOOT_FILE} ]; then
+    sed -i '\#cat <<EOL >> /etc/ssh/sshd_config#d' ${BOOT_FILE}
+    sed -i '\#UseDNS no#d' ${BOOT_FILE}
+    sed -i '\#PermitRootLogin without-password#d' ${BOOT_FILE}
+fi
+
+# Get rid of any lines in the root user's authorized_keys file that requires a non-root default user
+# Example: Please login as the user "admin" rather than the user "root"
+sed -i 's/^.*ssh\-rsa/ssh\-rsa/' /root/.ssh/authorized_keys
+
+sed -i '/mnt\/ephemeral/d' /etc/fstab
+
+rm -f /tmp/id_rsa*
+
+if [ "${distro}" == 'CentOS' -o "${distro}" == 'RedHatEnterpriseServer' -o "${distro}" == 'EnterpriseEnterpriseServer' \
+        -o "${distro}" == 'OracleServer' -o "${distro}" == 'AmazonAMI' ]; then
+# selinux
+    if /usr/sbin/selinuxenabled; then
+        /usr/sbin/setenforce 0
+    fi
+    sed -i -r "s:^(SELINUX=).*:\\1disabled:" /etc/selinux/config
+
+      # iptables
+    if /sbin/chkconfig --list iptables | grep on; then
+        /sbin/chkconfig iptables off
+    fi
+    if /sbin/service iptables status; then
+        /sbin/service iptables stop
+    fi
+
+    if [[ "${distro}" = 'OracleServer' && "${rel}" = *"7."* ]]; then
+        systemctl stop iptables
+        systemctl disable iptables
+    fi
+
+    perl -pi -e 's/1\t1/1\t0/' /etc/fstab
+
+    if [ "${distro}" == 'CentOS' -a "${rel}" == "5.10" ]; then
+        touch /etc/hosts
+        sed -i '/localhost/d' /etc/hosts
+        echo -e "127.0.0.1\tlocalhost\tlocalhost.localdomain" >> /etc/hosts
+    fi
+elif [ "${distro}" == "SLES LINUX" ]; then
+    # Disable force check of /
+    perl -pi -e 's/1\t1/1\t0/' /etc/fstab
+
+    # force hostname to stay set
+    sed -i -r 's:DHCLIENT_SET_HOSTNAME="yes":DHCLIENT_SET_HOSTNAME=:' /etc/sysconfig/network/dhcp
+
+# iptables
+    for SERVICE in SuSEfirewall2_init SuSEfirewall2_setup; do
+        /sbin/chkconfig $SERVICE off
+        /sbin/service $SERVICE stop
+    done
+fi
+
+if [ -f /sbin/chkconfig ]; then
+    if [ -f /etc/init.d/ntp ]; then
+        /sbin/chkconfig ntp on
+    elif [ -f /etc/init.d/ntpd ]; then
+        /sbin/chkconfig ntpd on
+    fi
+elif [ -d /etc/systemd ]; then
+    # On a Debian GCE 8.4 system, it's ntp.service, not ntpd.service - so let's check first
+    if [[ $(systemctl status ntpd.service | grep not-found) ]]; then
+        systemctl enable ntp.service || true
+    else
+        systemctl enable ntpd.service || true
+    fi
+fi
+
+sed -i -r "s:^#?PermitRootLogin.*$:PermitRootLogin yes:" /etc/ssh/sshd_config
+sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+if [ -f /etc/cloud/cloud.cfg ]; then
+    sed -i 's/^disable_root.*/disable_root\: 0/' /etc/cloud/cloud.cfg
+    sed -i 's/^ssh_pwauth.*/ssh_pwauth\: 1/' /etc/cloud/cloud.cfg
+
+    if [ \( "${distro}" == "Debian" \) -a \( "${rel##8}" != "${rel}" \) ]; then ## Debian 8.x
+       if ! grep -q -i -E '^mount_default_fields:' /etc/cloud/cloud.cfg; then
+            echo '' >> /etc/cloud/cloud.cfg
+            echo '#adjust default mount options to fix the booting issues for some OSes, say, Debian 8.x' >> /etc/cloud/cloud.cfg
+            echo 'mount_default_fields: [ None, None, "auto", "defaults,nofail", "0", "2" ]' >> /etc/cloud/cloud.cfg
+            echo '' >> /etc/cloud/cloud.cfg
+       fi
+   fi
+fi
+
+if [ -f /etc/init.d/ec2-get-credentials ]; then
+    sed -i -r "s:username='admin':username='root':" /etc/init.d/ec2-get-credentials
+fi
+if [ -f /etc/sysconfig/oraclevm-template ]; then
+    sed -i -r "s:RUN_TEMPLATE_CONF=NO:RUN_TEMPLATE_CONF=YES:" /etc/sysconfig/oraclevm-template
+fi
+
+chmod +w /etc/sudoers
+sed -i 's/Defaults.*requiretty//g' /etc/sudoers
+chmod -w /etc/sudoers
+
+# CLOUDCAT-2209: add udev logic to create standard /dev/sd* device symlinks for /dev/nvme* devices
+# More details: https://github.com/coreos/bugs/issues/2399#issuecomment-420417245
+#               https://gist.github.com/jalaziz/c22c8464cb602bc2b8d0a339b013a9c4
+if [ -d "/tmp/nvme_mapping" ]; then
+    install -m 0644 /tmp/nvme_mapping/70-ec2-nvme-devices.rules /etc/udev/rules.d/
+    install -m 0755 /tmp/nvme_mapping/ebsnvme-id.py /sbin/ebsnvme-id
+    install -m 0755 /tmp/nvme_mapping/ec2nvme-nsid /sbin/ec2nvme-nsid
+    chown root:root /etc/udev/rules.d/70-ec2-nvme-devices.rules /sbin/ebsnvme-id /sbin/ec2nvme-nsid
+fi
