@@ -2,16 +2,6 @@
   "cdhVersion": "6.1.1",
   "services": [
     {
-      "refName": "isilon",
-      "serviceType": "ISILON",
-      "serviceConfigs": [
-        {
-          "name": "default_fs_name",
-          "value": "hdfs"
-        }
-      ]
-    },
-    {
       "refName": "zookeeper",
       "serviceType": "ZOOKEEPER",
       "roleConfigGroups": [
@@ -157,6 +147,27 @@
           "base": true
         }
       ]
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-BASE",
+          "roleType": "IMPALAD",
+          "base": true
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": true
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "base": true
+        }
+      ]
     }
   ],
   "hostTemplates": [
@@ -170,6 +181,8 @@
         "hdfs-NFSGATEWAY-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
         "hive-HIVESERVER2-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
@@ -178,9 +191,44 @@
       "cardinality": null
     },
     {
-      "refName": "worker",
+      "refName": "worker1",
+      "roleConfigGroupsRefNames": [
+        "hdfs-NAMENODE-BASE",
+        "impala-IMPALAD-BASE",
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "zookeeper-SERVER-BASE"
+      ],
+      "cardinality": null
+    },
+    {
+      "refName": "worker2",
       "roleConfigGroupsRefNames": [
         "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-BASE",
+        "impala-IMPALAD-BASE",
+        "zookeeper-SERVER-BASE"
+      ],
+      "cardinality": null
+    },
+    {
+      "refName": "worker3",
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "impala-IMPALAD-BASE",
+        "yarn-NODEMANAGER-BASE"
+      ],
+      "cardinality": null
+    },
+    {
+      "refName": "worker4",
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "impala-IMPALAD-BASE",
         "hive-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
