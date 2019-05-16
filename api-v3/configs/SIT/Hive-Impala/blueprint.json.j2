@@ -77,6 +77,22 @@
       ]
     },
     {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "yarn",
       "serviceType": "YARN",
       "roleConfigGroups": [
@@ -180,6 +196,8 @@
         "hdfs-GATEWAY-BASE",
         "hdfs-NFSGATEWAY-BASE",
         "hive-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
         "hive-HIVEMETASTORE-BASE",
         "impala-CATALOGSERVER-BASE",
         "impala-STATESTORE-BASE",
@@ -195,6 +213,7 @@
       "roleConfigGroupsRefNames": [
         "impala-IMPALAD-BASE",
         "hdfs-DATANODE-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
         "hive-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],

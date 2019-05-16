@@ -106,6 +106,22 @@
       ]
     },
     {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "hive",
       "serviceType": "HIVE",
       "serviceConfigs": [
@@ -158,6 +174,8 @@
         "hdfs-SECONDARYNAMENODE-BASE",
         "hdfs-GATEWAY-BASE",
         "hdfs-NFSGATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
@@ -172,6 +190,7 @@
       "roleConfigGroupsRefNames": [
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
       "cardinality": null
