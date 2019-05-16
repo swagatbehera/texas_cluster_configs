@@ -77,22 +77,6 @@
       ]
     },
     {
-      "refName": "spark_on_yarn",
-      "serviceType": "SPARK_ON_YARN",
-      "roleConfigGroups": [
-        {
-          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "roleType": "SPARK_YARN_HISTORY_SERVER",
-          "base": true
-        },
-        {
-          "refName": "spark_on_yarn-GATEWAY-BASE",
-          "roleType": "GATEWAY",
-          "base": true
-        }
-      ]
-    },
-    {
       "refName": "yarn",
       "serviceType": "YARN",
       "roleConfigGroups": [
@@ -117,6 +101,23 @@
         {
           "refName": "yarn-JOBHISTORY-BASE",
           "roleType": "JOBHISTORY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "tez",
+      "serviceType": "TEZ",
+      "serviceConfigs": [
+        {
+          "name": "yarn_service",
+          "ref": "yarn"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
           "base": true
         }
       ]
@@ -160,6 +161,40 @@
       ]
     },
     {
+      "refName": "hive_on_tez",
+      "serviceType": "HIVE_ON_TEZ",
+      "serviceConfigs": [
+        {
+          "name": "hms_connector",
+          "ref": "hive"
+        },
+        {
+          "name": "tez_service",
+          "ref": "tez"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "mapreduce_yarn_service",
+          "ref": "yarn"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive_on_tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive_on_tez-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "impala",
       "serviceType": "IMPALA",
       "roleConfigGroups": [
@@ -191,9 +226,10 @@
         "hdfs-GATEWAY-BASE",
         "hdfs-NFSGATEWAY-BASE",
         "hive-GATEWAY-BASE",
-        "spark_on_yarn-GATEWAY-BASE",
-        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
         "hive-HIVEMETASTORE-BASE",
+        "hive_on_tez-HIVESERVER2-BASE",
+        "hive_on_tez-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
         "impala-CATALOGSERVER-BASE",
         "impala-STATESTORE-BASE",
         "yarn-JOBHISTORY-BASE",
@@ -207,8 +243,9 @@
       "roleConfigGroupsRefNames": [
         "impala-IMPALAD-BASE",
         "hdfs-DATANODE-BASE",
-        "spark_on_yarn-GATEWAY-BASE",
         "hive-GATEWAY-BASE",
+        "hive_on_tez-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
       "cardinality": null
