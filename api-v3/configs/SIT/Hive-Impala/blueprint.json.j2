@@ -1,145 +1,205 @@
 {
-  "environment": {
-    "name": "{{ generated.environment }}",
-    "credentialName": "{{ credential }}"
-  },
-
-  {% if generated.cloud_platform == 'yarn' %}
-  "yarn": {
-    "yarnQueue": "{{ ycloud_queue }}"
-  },
-  {% endif %}
-
-  "customDomain": {
-    "clusterNameAsSubdomain": false,
-    "hostgroupNameAsHostname": false
-  },
-
-  "tags": {
-    "userDefinedTags": {}
-  },
-
-  "placement": {
-    {% if generated.cloud_platform == 'openstack' %}
-    "availabilityZone": "nova",
-    "region": "RegionOne"
-    {% elif generated.cloud_platform == 'azure' %}
-    "region": "North Europe"
-    {% elif generated.cloud_platform == 'aws' %}
-    "availabilityZone": "us-west-1a",
-    "region": "us-west-1"
-    {% else %}
-    "region": "default"
-    {% endif %}
-  },
-
-  "authentication": {
-    {% if generated.cloud_platform == 'openstack' %}
-    "publicKeyId": "hwqe-keypair"
-    {% else %}
-    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5Zx7QmkQF+YIYxZ3z7KeD/CJAkzijm49QHQDIA0AnY2rLqFj09ZvKKFPVh+wnEU4PhKMVAGlBBjlItumxwx90BTstgnQqXK09GR4KBQAq2vpwUz4prkllj84wMrBlIAWcWXSJxO5zI4atcIDBnUw+W0dfgjMzgKAfnrg45xT+rMzQw41t1rtcURO3VgmvDHt1xAAZ/Zo5XjguOhIhdR9IOyTwyowHHcm2IGeuLuOeupAhcQc+7tEX+Jj8fxs9+0tbV4HYG3kM1Xe2r4kq5OPtM4YVOHRvqwmjmClR+i21iAs3EUWVRHI1KYywrULak7u01Y6PnI3pJ7pcO4HchgSR"
-    {% endif %}
-  },
-
-  "network": {
-    {% if generated.cloud_platform == 'openstack' %}
-    "openstack": {
-      {# See Openstack > Network > Networks #}
-      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
-      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449",
-      "networkingOption": "provider"
-    }
-    {% endif %}
-  },
-
-  "image": {
-    "catalog": "{{ image.catalog }}",
-    "id": "{{ image.uuid }}"
-  },
-
-  "cluster": {
-    "name": "{{ generated.cluster_name }}",
-    "userName": "{{ username }}",
-    "password": "{{ password }}",
-    {% if generated.cluster_type == ClusterType.DATALAKE %}
-    "databases": [
-      "{{ datalake_config.hive_metastore_db_name }}"
-    ],
-    {% else %}
-    "databases": [],
-    {% endif %}
-    "blueprintName": "{{ generated.cluster_name }}",
-    {# TODO: Add Ambari #}
-    "cm": {
-      "repository": {
-        "version": "{{ cloudera_manager.version }}",
-        "baseUrl": "{{ generated.cloudera_manager.base_url }}",
-        "gpgKeyUrl": "{{ generated.cloudera_manager.base_url }}/RPM-GPG-KEY-cloudera"
-      },
-      "products": [
+  "cdhVersion": "6.1.1",
+  "services": [
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
         {
-          "name": "{{ stack}}",
-          "version": "{{ generated.cloudera_manager.parcel_version }}",
-          "parcel": "{{ generated.cloudera_manager.parcels_url}}"
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          {% if cloud_provider == 'yarn' %}
+          "configs": [
+            {
+              "name": "dfs_name_dir_list",
+              "value": "/hadoopfs/fs1/namenode"
+            }
+          ],
+          {% endif %}
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          {% if cloud_provider == 'yarn' %}
+          "configs": [
+            {
+              "name": "fs_checkpoint_dir_list",
+              "value": "/hadoopfs/fs1/secondarynamenode"
+            }
+          ],
+          {% endif %}
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          {% if cloud_provider == 'yarn' %}
+          "configs": [
+            {
+              "name": "dfs_data_dir_list",
+              "value": "/hadoopfs/fs1/datanode"
+            },
+            {
+              "name": "dfs_datanode_failed_volumes_tolerated",
+              "value": "0"
+            }
+          ],
+          {% endif %}
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-NFSGATEWAY-BASE",
+          "roleType": "NFSGATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-NODEMANAGER-BASE",
+          "roleType": "NODEMANAGER",
+          {% if cloud_provider == 'yarn' %}
+          "configs": [
+            {
+              "name": "yarn_nodemanager_local_dirs",
+              "value": "/hadoopfs/fs1/nodemanager"
+            }
+          ],
+          {% endif %}
+          "base": true
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE",
+      "serviceConfigs": [
+        {
+          "name": "hive_metastore_database_password",
+          "variable": "hive-hive_metastore_database_password"
+        },
+        {
+          "name": "hive_metastore_database_port",
+          "variable": "hive-hive_metastore_database_port"
+        },
+        {
+          "name": "hive_metastore_database_host",
+          "variable": "hive-hive_metastore_database_host"
+        },
+        {
+          "name": "hive_metastore_database_type",
+          "variable": "hive-hive_metastore_database_type"
+        },
+        {
+          "name": "hive_metastore_database_name",
+          "variable": "hive-hive_metastore_database_name"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-BASE",
+          "roleType": "IMPALAD",
+          "base": true
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": true
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "base": true
         }
       ]
     }
-  },
-
-  "instanceGroups": [
-  {
-      "nodeCount": 1,
-      "name": "{{ 'master' }}",
-      "type": "{{ 'GATEWAY' }}",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install"
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "hdfs-BALANCER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-NFSGATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
+        "hive-HIVESERVER2-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "zookeeper-SERVER-BASE"
       ],
-      "template": {
-        {% if generated.cloud_platform == 'yarn' %}
-        "yarn": {
-          "memory": 8192,
-          "cpus": 4
-        },
-        "instanceType": "",
-        "rootVolume": {
-          "size": 100
-        },
-        "attachedVolumes": [
-          {
-            "size": 0,
-            "count": 0
-          }
-        ]
-        {% endif %}
-      }
+      "cardinality": null
     },
     {
-      "nodeCount": 4,
-      "name": "{{ 'worker' }}",
-      "type": "{{ 'CORE' }}",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install"
+      "refName": "worker",
+      "roleConfigGroupsRefNames": [
+        "impala-IMPALAD-BASE",
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-BASE"
       ],
-      "template": {
-        {% if generated.cloud_platform == 'yarn' %}
-        "yarn": {
-          "memory": 8192,
-          "cpus": 4
-        },
-        "instanceType": "",
-        "rootVolume": {
-          "size": 100
-        },
-        "attachedVolumes": [
-          {
-            "size": 0,
-            "count": 0
-          }
-        ]
-        {% endif %}
-      }
+      "cardinality": null
     }
-  ]
+  ],
+  "displayName": "sit-test-cluster"
 }
