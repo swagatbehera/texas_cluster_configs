@@ -106,23 +106,6 @@
       ]
     },
     {
-      "refName": "tez",
-      "serviceType": "TEZ",
-      "serviceConfigs": [
-        {
-          "name": "yarn_service",
-          "ref": "yarn"
-        }
-      ],
-      "roleConfigGroups": [
-        {
-          "refName": "tez-GATEWAY-BASE",
-          "roleType": "GATEWAY",
-          "base": true
-        }
-      ]
-    },
-    {
       "refName": "hive",
       "serviceType": "HIVE",
       "serviceConfigs": [
@@ -154,42 +137,13 @@
           "base": true
         },
         {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true
+        },
+        {
           "refName": "hive-HIVEMETASTORE-BASE",
           "roleType": "HIVEMETASTORE",
-          "base": true
-        }
-      ]
-    },
-    {
-      "refName": "hive_on_tez",
-      "serviceType": "HIVE_ON_TEZ",
-      "serviceConfigs": [
-        {
-          "name": "hms_connector",
-          "ref": "hive"
-        },
-        {
-          "name": "tez_service",
-          "ref": "tez"
-        },
-        {
-          "name": "zookeeper_service",
-          "ref": "zookeeper"
-        },
-        {
-          "name": "mapreduce_yarn_service",
-          "ref": "yarn"
-        }
-      ],
-      "roleConfigGroups": [
-        {
-          "refName": "hive_on_tez-GATEWAY-BASE",
-          "roleType": "GATEWAY",
-          "base": true
-        },
-        {
-          "refName": "hive_on_tez-HIVESERVER2-BASE",
-          "roleType": "HIVESERVER2",
           "base": true
         }
       ]
@@ -206,9 +160,7 @@
         "hdfs-NFSGATEWAY-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
-        "hive_on_tez-HIVESERVER2-BASE",
-        "hive_on_tez-GATEWAY-BASE",
-        "tez-GATEWAY-BASE",
+        "hive-HIVESERVER2-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE"
@@ -220,8 +172,6 @@
       "roleConfigGroupsRefNames": [
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
-        "hive_on_tez-GATEWAY-BASE",
-        "tez-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
       "cardinality": null
