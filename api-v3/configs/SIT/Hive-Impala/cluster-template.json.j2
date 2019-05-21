@@ -72,15 +72,16 @@
     {# TODO: Add Ambari #}
     "cm": {
       "repository": {
+        {# TODO: Versioning #}
         "version": "{{ cloudera_manager.version }}",
         "baseUrl": "{{ generated.cloudera_manager.base_url }}",
         "gpgKeyUrl": "{{ generated.cloudera_manager.base_url }}/RPM-GPG-KEY-cloudera"
       },
       "products": [
         {
-          "name": "{{ stack}}",
+          "name": "CDH",
           "version": "{{ generated.cloudera_manager.parcel_version }}",
-          "parcel": "{{ generated.cloudera_manager.parcels_url}}"
+          "parcel": "{{ generated.cloudera_manager.parcels_url }}"
         }
       ]
     }
