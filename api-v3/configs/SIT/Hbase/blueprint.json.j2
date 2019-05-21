@@ -19,28 +19,33 @@
         {
           "refName": "hdfs-NAMENODE-BASE",
           "roleType": "NAMENODE",
+          {% if cloud_provider == 'yarn' %}
           "configs": [
             {
               "name": "dfs_name_dir_list",
               "value": "/hadoopfs/fs1/namenode"
             }
           ],
+          {% endif %}
           "base": true
         },
         {
           "refName": "hdfs-SECONDARYNAMENODE-BASE",
           "roleType": "SECONDARYNAMENODE",
+          {% if cloud_provider == 'yarn' %}
           "configs": [
             {
               "name": "fs_checkpoint_dir_list",
               "value": "/hadoopfs/fs1/secondarynamenode"
             }
           ],
+          {% endif %}
           "base": true
         },
         {
           "refName": "hdfs-DATANODE-BASE",
           "roleType": "DATANODE",
+          {% if cloud_provider == 'yarn' %}
           "configs": [
             {
               "name": "dfs_data_dir_list",
@@ -51,11 +56,22 @@
               "value": "0"
             }
           ],
+          {% endif %}
           "base": true
         },
         {
           "refName": "hdfs-BALANCER-BASE",
           "roleType": "BALANCER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-NFSGATEWAY-BASE",
+          "roleType": "NFSGATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
           "base": true
         }
       ]
@@ -88,12 +104,14 @@
         {
           "refName": "yarn-NODEMANAGER-BASE",
           "roleType": "NODEMANAGER",
+          {% if cloud_provider == 'yarn' %}
           "configs": [
             {
               "name": "yarn_nodemanager_local_dirs",
               "value": "/hadoopfs/fs1/nodemanager"
             }
           ],
+          {% endif %}
           "base": true
         },
         {
@@ -108,10 +126,12 @@
     {
       "refName": "master",
       "roleConfigGroupsRefNames": [
-        "hbase-MASTER-BASE",
         "hdfs-BALANCER-BASE",
+        "hbase-MASTER-BASE",
         "hdfs-NAMENODE-BASE",
         "hdfs-SECONDARYNAMENODE-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-NFSGATEWAY-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE"
@@ -121,12 +141,12 @@
     {
       "refName": "worker",
       "roleConfigGroupsRefNames": [
-        "hbase-REGIONSERVER-BASE",
         "hdfs-DATANODE-BASE",
+        "hbase-REGIONSERVER-BASE",
         "yarn-NODEMANAGER-BASE"
       ],
       "cardinality": null
     }
   ],
-  "displayName": "expedite"
+  "displayName": "sit-test-cluster"
 }
