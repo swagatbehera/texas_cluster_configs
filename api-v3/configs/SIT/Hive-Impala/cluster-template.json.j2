@@ -72,19 +72,20 @@
     {# TODO: Add Ambari #}
     "cm": {
       "repository": {
-       "version": "7.x.0",
-        "baseUrl": "http://cloudera-build-3-us-central-1.gce.cloudera.com/s3/build/1085754/cm7/7.x.0/redhat7/yum/",
-        "gpgKeyUrl": "http://cloudera-build-3-us-central-1.gce.cloudera.com/s3/build/1085754/cm7/7.x.0/redhat7/yum/RPM-GPG-KEY-cloudera"
+        "version": "{{ cloudera_manager.version }}",
+        "baseUrl": "{{ generated.cloudera_manager.base_url }}",
+        "gpgKeyUrl": "{{ generated.cloudera_manager.base_url }}/RPM-GPG-KEY-cloudera"
       },
       "products": [
         {
-         "name": "CDH",
-         "version": "6.0.99-1.cdh6.0.99.p0.212",
-         "parcel": "http://cloudera-build-3-us-central-1.gce.cloudera.com/s3/build/1086243/cdh/6.x/parcels/"
+          "name": "{{ stack}}",
+          "version": "{{ generated.cloudera_manager.parcel_version }}",
+          "parcel": "{{ generated.cloudera_manager.parcels_url}}"
         }
       ]
     }
   },
+
 
   "instanceGroups": [
   {
