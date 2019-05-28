@@ -1,0 +1,162 @@
+{
+  "environment": {
+    "name": "{{ generated.environment }}",
+    "credentialName": "{{ credential }}"
+  },
+
+  {% if generated.cloud_platform == 'yarn' %}
+  "yarn": {
+    "yarnQueue": "{{ ycloud_queue }}"
+  },
+  {% endif %}
+
+  "customDomain": {
+    "clusterNameAsSubdomain": false,
+    "hostgroupNameAsHostname": false
+  },
+  "placement": {
+    {% if generated.cloud_platform == 'openstack' %}
+    "availabilityZone": "nova",
+    "region": "RegionOne"
+    {% elif generated.cloud_platform == 'azure' %}
+    "region": "North Europe"
+    {% elif generated.cloud_platform == 'aws' %}
+    "availabilityZone": "us-west-1a",
+    "region": "us-west-1"
+    {% else %}
+    "region": "default"
+    {% endif %}
+  },
+
+  "authentication": {
+    {% if generated.cloud_platform == 'openstack' %}
+    "publicKeyId": "hwqe-keypair"
+    {% else %}
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB/hBQfzF91SExZ4MglU7eX26RfIEsz5aCGzzbaGeQG7Jch5XIWHE192A/5jRUZy2eU5sFMsYS32LEqKSVJn5N/5P7yE2QvcTUosM7wHWQW4JrImL0PTJTPXRc/QvkGPka3LvBCL6PlVENyGGo+C3D+dgSloaBeZ9URk0I+Yc/VsihQoMdkVOYIKAGxZlG/JBEBBjCZ5ng4WlzdfcsKgtUGbr6nOn3mqK8/Pkv8CeWguEYaibj5Os6ydmHVZ30w0tLD6Gu7UH14M3M3LnNlCndSLG4bRzUP6OxGEFWlG8GPJnv3Z3h3obqK3jIAsx8GHR9ExR8YdNlvkigbQg8xDGJ hw-qe@hortonworks.com"
+    {% endif %}
+  },
+
+  "network": {
+    {% if generated.cloud_platform == 'openstack' %}
+    "openstack": {
+      {# See Openstack > Network > Networks #}
+      "subnetId": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+      "networkId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449",
+      "networkingOption": "provider"
+    }
+    {% endif %}
+  },
+
+  "image": {
+    "catalog": "{{ image.catalog }}",
+    "id": "{{ image.uuid }}"
+  },
+
+  "cluster": {
+    "name": "{{ generated.cluster_name }}",
+    "userName": "{{ username }}",
+    "password": "{{ password }}",
+    "databases": [],
+    "blueprintName": "CDP 1.0 DE Custom BP",
+    {# TODO: Add Ambari #}
+    "cm": {
+      "repository": {
+       "version": "{{ cloudera_manager.version }}",
+        "baseUrl": "{{ generated.cloudera_manager.base_url }}",
+        "gpgKeyUrl": "{{ generated.cloudera_manager.base_url }}/RPM-GPG-KEY-cloudera"
+      },
+      "products": [
+        {
+          "name": "CDH",
+          "version": "{{ generated.cloudera_manager.parcel_version }}",
+          "parcel": "{{ generated.cloudera_manager.parcels_url }}"
+        }
+      ]
+    }
+  },
+
+  "instanceGroups": [
+    {
+      "nodeCount": 1,
+      "name": "{{ 'master' }}",
+      "type": "{{ 'GATEWAY' }}",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination"
+      ],
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 16000,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 4,
+      "name": "{{ 'worker' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [
+        "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
+        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination"
+      ],
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 16000,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    },
+    {
+      "nodeCount": 1,
+      "name": "{{ 'compute' }}",
+      "type": "{{ 'CORE' }}",
+      "recoveryMode": "MANUAL",
+      "template": {
+        {% if generated.cloud_platform == 'yarn' %}
+        "yarn": {
+          "memory": 8192,
+          "cpus": 4
+        },
+        "instanceType": "",
+        "rootVolume": {
+          "size": 100
+        },
+        "attachedVolumes": [
+          {
+            "size": 0,
+            "count": 0
+          }
+        ]
+        {% endif %}
+      }
+    }
+  ]
+}
