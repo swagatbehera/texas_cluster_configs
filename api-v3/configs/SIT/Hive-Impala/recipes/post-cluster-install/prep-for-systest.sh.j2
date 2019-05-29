@@ -287,3 +287,19 @@ if [ -d "/tmp/nvme_mapping" ]; then
     install -m 0755 /tmp/nvme_mapping/ec2nvme-nsid /sbin/ec2nvme-nsid
     chown root:root /etc/udev/rules.d/70-ec2-nvme-devices.rules /sbin/ebsnvme-id /sbin/ec2nvme-nsid
 fi
+function createJenkinsUser() {
+    getent passwd 'jenkins'  > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Creating Jenkins user"
+        mkdir -p /var/lib
+        chmod 0755 /var/lib
+        useradd -c jenkins -s /bin/bash -m  -d /var/lib/jenkins jenkins
+    fi
+
+    mkdir -p /var/lib/jenkins/.ssh
+    curl -sL http://github.infra.cloudera.com/raw/Kitchen/sshkeys/master/_jenkins.pub --output /tmp/jenkins.pub
+    cat /tmp/jenkins.pub >> /var/lib/jenkins/.ssh/authorized_keys
+    chmod 600 /var/lib/jenkins/.ssh/authorized_keys
+    chown -R jenkins /var/lib/jenkins
+}
+createJenkinsUser

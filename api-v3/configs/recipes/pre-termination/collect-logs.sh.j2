@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+# Setup pyenv for running log collector
+
+export PYENV_ROOT=/root/.pyenv
+export PATH=$PYENV_ROOT/bin:$PATH
+
+eval "$(pyenv init -)"
+pyenv local 3.6.4
+
+pip install paramiko==2.4.1
+
+cd /root/infra-v2
+
+# Invoke log collector
+export PYTHONPATH=/root/infra-v2
+python $PYTHONPATH/modules/log_collection/trigger/runE2E.py \
+    --cluster-name "/qaas/{{ generated.job_name }}" \
+    --cloud-type kubernetes \
+    --freq 1 \
+    --sleep-time-minutes 30 \
+    --test-component qaas \
+    --working-directory $PYTHONPATH/modules/log_collection/ \
+    --log-transport-type=awscli \
+    --storage=s3
