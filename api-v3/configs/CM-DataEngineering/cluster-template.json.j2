@@ -82,10 +82,10 @@
       "type": "{{ 'GATEWAY' }}",
       "recoveryMode": "MANUAL",
       "recipeNames": [
+        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install",
         "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
         "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
-        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination",
-        "{{ generated.cluster_name }}-prep-for-systest-sh-pre-ambari-start"
+        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination"
       ],
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
@@ -112,10 +112,10 @@
       "type": "{{ 'CORE' }}",
       "recoveryMode": "MANUAL",
       "recipeNames": [
+        "{{ generated.cluster_name }}-prep-for-systest-sh-post-cluster-install",
         "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start",
         "{{ generated.cluster_name }}-init-sh-pre-ambari-start",
-        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination",
-        "{{ generated.cluster_name }}-prep-for-systest-sh-pre-ambari-start"
+        "{{ generated.cluster_name }}-collect-logs-sh-pre-termination"
       ],
       "template": {
         {% if generated.cloud_platform == 'yarn' %}
