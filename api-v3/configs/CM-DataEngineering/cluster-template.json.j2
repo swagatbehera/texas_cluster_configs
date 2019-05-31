@@ -135,33 +135,6 @@
         ]
         {% endif %}
       }
-    },
-    {
-      "nodeCount": 1,
-      "name": "{{ 'compute' }}",
-      "type": "{{ 'CORE' }}",
-      "recoveryMode": "MANUAL",
-      "recipeNames": [
-        "{{ generated.cluster_name }}-log-collector-setup-sh-pre-ambari-start"
-      ],
-      "template": {
-        {% if generated.cloud_platform == 'yarn' %}
-        "yarn": {
-          "memory": 8192,
-          "cpus": 4
-        },
-        "instanceType": "",
-        "rootVolume": {
-          "size": 100
-        },
-        "attachedVolumes": [
-          {
-            "size": 0,
-            "count": 0
-          }
-        ]
-        {% endif %}
-      }
     }
   ]
 }
